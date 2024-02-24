@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary : #FFAF87;
+    --secondary : #5C636E;
+    --text-secondary : #393E46;
+    --input-disabled : #F9F7F7;
+    
+    --input-border : #D3D4D8;
+    --input-color : #393E46; 
+    --input-dark-bg-color: #ffaf8726;
+    --img-overlay : #D99877;
+
+    --success : #1E835C;
+    --error : #F55741;
+
+    --bg-screen : background: linear-gradient(180deg, #FBF7F4 0%, #FFF 100%);
+    
+}
+
+body {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text-gray);
+    /* background-color: #fff7f3; */
+}
+
+ul li {
+    @apply text-base;
+}
+
+ol li > p {
+    @apply text-base;
+}
+
+p{
+    @apply text-base;
+}
