@@ -1,4 +1,4 @@
-<p align="center"><a href="https://foodierecipe.rhealabayo.com/" target="_blank"><img src="https://foodierecipe.rhealabayo.com/storage/assets/images/logo.png" width="400" alt="FoodieRecipe Logo"></a></p>
+<p align="center"><a href="https://foodierecipe.rhealabayo.com/" target="_blank"><img src="storage/app/public/assets/images/logo_200x89.png" width="200" alt="FoodieRecipe Logo"></a></p>
 
 <!-- <p align="center">
 <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
