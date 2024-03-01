@@ -2,18 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Profile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ProfileTest extends TestCase
+class ProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
     public function test_profile_page_is_displayed(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this->actingAs($user)
             ->get('/profile');
@@ -23,7 +22,8 @@ class ProfileTest extends TestCase
 
     public function test_profile_can_be_viewed(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this->actingAs($user)
                 ->get('/profile/' . $user->id);
@@ -33,7 +33,8 @@ class ProfileTest extends TestCase
 
     public function test_profile_can_be_edited(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this->actingAs($user)
                 ->get('/profile/user/edit');
@@ -43,7 +44,8 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this
             ->actingAs($user)
@@ -85,7 +87,8 @@ class ProfileTest extends TestCase
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this
             ->actingAs($user)
@@ -103,7 +106,8 @@ class ProfileTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = $this->create_user_profile();
+        $user_profile = new CreateUserProfile();
+        $user = $user_profile->create_user_profile();
 
         $response = $this
             ->actingAs($user)
@@ -119,17 +123,4 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->fresh());
     }
 
-    public function create_user_profile() {
-        $user = User::factory()->create();
-
-        Profile::create([
-            'user_id' => $user->id,
-            'image' => 'assets/images/default_profile.svg',
-            'thumbnail' => 'assets/images/default_profile.svg',
-            'description' => 'Enter description here',
-            'private' => 1
-        ]);
-
-        return $user;
-    }
 }
