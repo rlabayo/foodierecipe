@@ -6,6 +6,7 @@ use App\Enums\Boolean;
 use App\Enums\Unit;
 use App\Http\Requests\StoreRecipeRequest;
 use App\Http\Requests\UpdateRecipeRequest;
+use App\Libraries\CommonLibrary;
 use App\Libraries\ImageLibrary;
 use App\Logging\CustomFile;
 use App\Models\Comment;
@@ -123,19 +124,9 @@ class RecipeController extends Controller
         $exploded_title = explode(' ', $recipe->title);
         $recipe_id = $recipe->id;
 
-        $recommendation_list = DB::table('recipes')->select('id', 'title')
-            ->orWhere(function (Builder $query) use($exploded_title) {
-                foreach($exploded_title as $key => $element) {
-                    if($key == 0) {
-                        $query->where('title', 'like', '%'.$element.'%')
-                            ->orwhere('ingredients', 'like', '%'.$element.'%');
-                    }
-                        $query->orWhere('title', 'like', '%'.$element.'%')
-                            ->orwhere('ingredients', 'like', '%'.$element.'%');
-                }
-            })
-            ->where('id', '<>', $recipe_id)
-            ->limit(5)->get();
+        // get recommendation list
+        $common = new CommonLibrary();
+        $recommendation_list = $common->get_recommendation($recipe_id, $exploded_title);
 
         // get comments
         $comments = Recipe::find($id)->comments()->latest()->paginate(5);

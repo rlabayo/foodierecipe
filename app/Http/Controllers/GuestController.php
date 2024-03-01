@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Unit;
+use App\Libraries\CommonLibrary;
 use App\Models\Profile;
 use App\Models\Recipe;
 use App\Models\User;
@@ -30,20 +31,9 @@ class GuestController extends Controller
 
         $exploded_title = explode(' ', $recipe->title);
         
-        $recommendation_list = DB::table('recipes')->select('id', 'title')
-            ->orWhere(function (Builder $query) use($exploded_title) {
-                foreach($exploded_title as $key => $element) {
-                    if($key == 0) {
-                        $query->where('title', 'like', '%'.$element.'%')
-                            ->orwhere('ingredients', 'like', '%'.$element.'%');
-                    }
-                        $query->orWhere('title', 'like', '%'.$element.'%')
-                            ->orwhere('ingredients', 'like', '%'.$element.'%');
-                }
-            })
-            ->where('id', '<>', $id)
-            ->where('private', '<>', '1')
-            ->limit(5)->get();
+        // get recommendation list
+        $common = new CommonLibrary();
+        $recommendation_list = $common->get_recommendation($id, $exploded_title);
 
         // get comments
         $comments = Recipe::find($id)->comments()->latest()->paginate(5);
