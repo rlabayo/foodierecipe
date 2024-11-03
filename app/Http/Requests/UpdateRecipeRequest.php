@@ -26,7 +26,7 @@ class UpdateRecipeRequest extends FormRequest
             'summary' => ['required'],
             'ingredients' => ['required'],
             'instruction' => ['required'],
-            'unit' => ['string'],
+            'is_draft' => 'boolean',
             'video_url' => ['sometimes', 'nullable', 'url'],
             'image' => ['file', 'mimes:jpg,jpeg,png,webp,JPG,PNG,JPEG,WEBP','max:2048'],
             'private' => 'boolean'

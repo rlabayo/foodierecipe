@@ -3,40 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Boolean;
-use App\Enums\Unit;
 use App\Http\Requests\StoreRecipeRequest;
 use App\Http\Requests\UpdateRecipeRequest;
 use App\Libraries\CommonLibrary;
 use App\Libraries\ImageLibrary;
 use App\Logging\CustomFile;
-use App\Models\Comment;
-use App\Models\Favorite;
-use App\Models\Profile;
 use App\Models\Recipe;
-use Exception;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\File as HttpFile;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Enum;
-use Throwable;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Str;
 use App\Models\User;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class RecipeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(){
-        $recipe = new Recipe();
-        $items = $recipe->get_all_recipes();
-        
-        return view('web.recipe.index', compact('items'));
+    public $image_library;
+    public $common_library;
+    public $comment_controller;
+    public $recipe_model;
+    
+    public function __construct()
+    {
+        // Library
+        $this->image_library = new ImageLibrary(); 
+        $this->common_library = new CommonLibrary();
+
+        // Controller
+        $this->comment_controller = new CommentController();
+
+        // Model
+        $this->recipe_model = new Recipe();
     }
 
     /**
@@ -44,16 +39,14 @@ class RecipeController extends Controller
      */
     public function create()
     {
-        $units = Unit::cases();
         $boolean = Boolean::cases();
-        // dd($units);
-        return view('web.recipe.create', compact('units', 'boolean'));
+
+        return view('web.recipe.create', compact('boolean'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    // public function store(Request $request)
     public function store(StoreRecipeRequest $request)
     {
         try{
@@ -62,25 +55,14 @@ class RecipeController extends Controller
             $image_banner = "";
             $image_thumbnail = "";
             
-            $imageLibrary = new ImageLibrary(); 
-            
             if($request->hasFile('image')){
-                // $image_banner = $imageLibrary->createImage($request->file('attachment_hidden_image'), 1435, 559, 'uploads/recipes/user_' .auth()->user()->id. '/banner/');
-                // $image_thumbnail = $imageLibrary->createImage($request->file('image'), 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
-                $image_banner = $imageLibrary->createImageFromBase64Image($request->attachment_banner, 1435, 559, 'uploads/recipes/user_' .auth()->user()->id. '/banner/');
-                $image_thumbnail = $imageLibrary->createImageFromBase64Image($request->attachment_thumbnail, 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
+                // Upload images to storage and get the image path name
+                $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
+                $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
             }
-            $instructions = json_decode($validated['instruction']);
-            
-            foreach($instructions as $key => $instruction){
-                $base64_photo = $instruction->attached_photo;
-                if($base64_photo != '' && $base64_photo != 'undefined'){
-                    $attached = $imageLibrary->createImageFromBase64Image($base64_photo, 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/instruction/');
-                    $instructions[$key]->attached_photo = $attached;
-                }else {
-                    $instructions[$key]->attached_photo = '';
-                }
-            }
+
+            // upload images and update the json instruction data with the image path name
+            $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
 
             Recipe::create([
                 'user_id' => $user_id,
@@ -90,6 +72,7 @@ class RecipeController extends Controller
                 'instruction' => json_encode($instructions),
                 'video_url' => $validated['video_url'],
                 'private' => $validated['private'],
+                'is_draft' => $validated['is_draft'],
                 'image' => $image_banner,
                 'thumbnail' => $image_thumbnail
             ]);
@@ -97,7 +80,7 @@ class RecipeController extends Controller
             return back()->with('status', 201);
 
         }catch(Throwable $e){
-            // Call in controller
+            // Call in controller to create or update the error file
             CustomFile::index('RecipeController', 'error', [
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
             ]);
@@ -111,33 +94,25 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe, $id)
     {
-        $unit = Unit::cases();
+        $recipe = $this->recipe_model->get_recipe_details($id);
         
-        $recipe = DB::table('recipes')
-                ->select('recipes.*')
-                ->selectRaw('favorites.id as favorite_id, (CASE WHEN favorites.id IS NULL then 0 else 1 END) AS is_favorite')
-                ->leftJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
-                ->where('recipes.id', '=', $id)
-                ->get()[0];
-                
-        // get recommendation list
-        $exploded_title = explode(' ', $recipe->title);
-        $recipe_id = $recipe->id;
+        // check if the recipe is available
+        if($recipe->count() > 0){
+            $recipe = $recipe[0];
+            // get array of exploded title
+            $exploded_title = explode(' ', $recipe->title);
+            // get recommendation list
+            $recommendation_list = $this->common_library->get_recommendation($recipe->id, $exploded_title);
 
-        // get recommendation list
-        $common = new CommonLibrary();
-        $recommendation_list = $common->get_recommendation($recipe_id, $exploded_title);
-
-        // get comments
-        $comments = Recipe::find($id)->comments()->latest()->paginate(5);
-        $total_comments = Recipe::find($id)->comments()->count();
-
-        foreach($comments as $key => $comment){
-            $comments[$key]->profile_thumbnail = Profile::find(['user_id', $comment->user_id])[0]->image;
-            $comments[$key]->profile_name = User::select('name')->where('id', $comment->user_id)->get()[0]->name;
+            // get comments
+            $comments = $this->comment_controller->get_comments_by_user_id($id);
+            $total_comments = Recipe::find($id)->comments()->count();
+            
+            return view('web.recipe.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list'));
         }
-
-        return view('web.recipe.show', compact('recipe', 'unit', 'comments', 'total_comments', 'recommendation_list'));
+        
+        // display error 404
+        return redirect('/recipe/error/404');
     }
 
     /**
@@ -145,7 +120,6 @@ class RecipeController extends Controller
      */
     public function edit(Recipe $recipe, $id)
     {
-        $units = Unit::cases();
         $boolean = Boolean::cases();
         $item = Recipe::find($id);
         
@@ -160,7 +134,6 @@ class RecipeController extends Controller
         try{
             $recipe = Recipe::find($request->id);
             $validated = $request->validated();
-            $imageLibrary = new ImageLibrary(); 
 
             $old_image = $recipe->image;
             $old_thumbnail = $recipe->thumbnail;
@@ -171,48 +144,25 @@ class RecipeController extends Controller
             // banner
             if($request->hasFile('image')){
                 // get the existing image filepath and remove
-                if(Storage::disk('public')->exists($old_image)){
-                    Storage::disk('public')->delete($old_image);
-                }
-                if(Storage::disk('public')->exists($old_thumbnail)){
-                    Storage::disk('public')->delete($old_thumbnail);
-                }
+                // image / banner
+                $this->image_library->delete_stored_image($old_image);
+                // thumbnail
+                $this->image_library->delete_stored_image($old_thumbnail);
                 
-                // $image_banner = $imageLibrary->createImage($request->file('attachment_hidden_image'), 1435, 559, 'uploads/recipes/user_' .auth()->user()->id. '/banner/');
-                // $image_thumbnail = $imageLibrary->createImage($request->file('image'), 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
+                $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
+                $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
 
-                $image_banner = $imageLibrary->createImageFromBase64Image($request->attachment_banner, 1435, 559, 'uploads/recipes/user_' .auth()->user()->id. '/banner/');
-                $image_thumbnail = $imageLibrary->createImageFromBase64Image($request->attachment_thumbnail, 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
-
-                // ($image_banner == false) && throw new Exception('Please try to upload image again with maximum of 2mb.');
             }
-            $instructions = json_decode($validated['instruction']);
-                
             // get the image list of old and new instruction
-            $new_image_list = array_map(function($item){
-                return $item['attached_photo'];
-            }, json_decode($validated['instruction'], true));
-
-            $old_image_list = array_map(function($item){
-                return $item['attached_photo'];
-            }, json_decode($recipe->instruction, true));
+            $new_image_list = $this->get_image_list_from_json_data($validated['instruction']);
+            $old_image_list = $this->get_image_list_from_json_data($recipe->instruction);
 
             // remove deleted images from storage
-            $this->remove_image_from_storage($old_image_list, $new_image_list);
+            $this->remove_old_image_from_storage($old_image_list, $new_image_list);
 
-            foreach($instructions as $key => $instruction){
-                $base64_photo = $instruction->attached_photo;
-                if($base64_photo != '' && $base64_photo != 'undefined'){
-                    if(str_contains($base64_photo, 'uploads/recipes')){
-                        // retain image
-                    }else{
-                        $attached = $imageLibrary->createImageFromBase64Image($base64_photo, 400, 300, 'uploads/recipes/user_' .auth()->user()->id. '/instruction/');
-                        $instructions[$key]->attached_photo = $attached;
-                    }
-                }else {
-                    $instructions[$key]->attached_photo = '';
-                }
-            }
+            // upload images and update the json instruction data with the image path name
+            $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
+
             $recipe->update([
                 'title' => $validated['title'],
                 'summary' => $validated['summary'],
@@ -220,11 +170,13 @@ class RecipeController extends Controller
                 'instruction' => json_encode($instructions),
                 'video_url' => $validated['video_url'],
                 'private' => $validated['private'],
+                'is_draft' => $validated['is_draft'],
                 'image' => $image_banner,
                 'thumbnail' => $image_thumbnail
             ]);
 
             return back()->with('status', 201);
+
         }catch(Throwable $e){
             // Call in controller
             CustomFile::index('RecipeController', 'error', [
@@ -249,20 +201,18 @@ class RecipeController extends Controller
             $thumbnail = $recipe->thumbnail;
 
             // remove banner image
-            $this->remove_recipe_images_from_storage((array)$banner);
+            $this->image_library->delete_stored_image($banner);
             // remove thumbnail image
-            $this->remove_recipe_images_from_storage((array)$thumbnail);
+            $this->image_library->delete_stored_image($thumbnail);
 
-            $image_list = array_map(function($item){
-                return $item['attached_photo'];
-            }, json_decode($recipe->instruction, true));
+            $image_list = $this->get_image_list_from_json_data($recipe->instruction);
 
             // remove deleted images from storage
-            $this->remove_recipe_images_from_storage($image_list);
+            $this->iterate_instruction_image_list($image_list);
 
             $recipe->delete();
             
-            return back()->with('status', 201);
+            return redirect(route('profile.index'))->with('status', 201);
 
         }catch(Throwable $e){
             // Call in controller
@@ -270,24 +220,41 @@ class RecipeController extends Controller
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
             ]);
             
-            return back()->withInput()->with('status', 400);
+            return back()->with('status', 400);
         }
     }
 
-    public function remove_recipe_images_from_storage($list){
+    /**
+     * Remove images
+     */
+    
+    public function iterate_instruction_image_list($list){
         if(count($list) > 0){
             array_map(function($image){
                 // delete image
-                if(Storage::disk('public')->exists($image)){
-                    Storage::disk('public')->delete($image);
-                }
+                $this->image_library->delete_stored_image($image);
             }, $list);
         }
         return;
     }
 
-    // compare old instruction list to new instruction
-    public function remove_image_from_storage($old_list, $new_list){
+     /**
+     * Extract image field from the instructions
+     */
+    public function get_image_list_from_json_data($instruction){
+        $image_list = array_map(function($item){
+            return $item['attached_photo'];
+        }, json_decode($instruction, true));
+
+        return $image_list;
+    }
+
+     /**
+     * Compare old instruction list to new instruction
+     * and then remove old images if images was updated to the specific instruction
+     */
+
+    public function remove_old_image_from_storage($old_list, $new_list){
         array_map(function($image) use ($new_list){
             if($image != ''){
                 $found = false; // set default found to false
@@ -300,13 +267,34 @@ class RecipeController extends Controller
                     // when done checking all the new image list and the old image is not found, delete the image from the public storage
                     if(count($new_list) == ($key+1) && $found == false){
                         // delete the image
-                        if(Storage::disk('public')->exists($image)){
-                            Storage::disk('public')->delete($image);
-                        }
+                        $this->image_library->delete_stored_image($image);
                     }
                 }
             }
         }, $old_list);
     }
+
+    /**
+     * Function to iterate json instructions to upload images
+     */
+
+     public function instructions_upload_images($instructions){
+
+        foreach($instructions as $key => $instruction){
+            $base64_photo = $instruction->attached_photo;
+            if($base64_photo != '' && $base64_photo != 'undefined'){
+                if(str_contains($base64_photo, 'uploads/recipes')){
+                    // retain image for update 
+                }else{
+                    $attached = $this->image_library->createImageFromBase64Image($base64_photo, 'uploads/recipes/user_' .auth()->user()->id. '/instruction/', 400, 400);
+                    $instructions[$key]->attached_photo = $attached;
+                }
+            }else {
+                $instructions[$key]->attached_photo = '';
+            }
+        }
+
+        return $instructions;
+     }
 
 }

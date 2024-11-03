@@ -11,7 +11,7 @@ class CardRecipe extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(public object $item, public string $pageName = "recipe")
+    public function __construct(public object $item)
     {
         //
     }

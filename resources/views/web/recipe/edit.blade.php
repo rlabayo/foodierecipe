@@ -15,9 +15,10 @@
                 @method('patch')
                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}" />
                 <div class="my-4">
-                    <x-input-label for="image" :value="__('Image Banner:')" class="font-semibold"/>
+                    <x-input-label for="image" :value="__('Image:')" class="font-semibold"/>
                     <x-input-file name="image" id="image" :value="old('image')" :width="1000" :height="559" update_value="{{ $recipe->image }}" />
                     <x-input-error :messages="$errors->get('image')" class="mt-2" />
+                    <p class="text-sm w-full">Recommendation: Compress images before uploading using <a href="https://tinypng.com/" alt="Tinyfy" class="text-red-500 font-bold">Tinyfy</a></p>
                 </div>
                 <div class="my-4">
                     <x-input-label for="title" :value="__('Title:')"  class="font-semibold"/>
@@ -38,6 +39,11 @@
                     <x-input-label for="private" :value="__('Is private?')"  class="font-semibold"/>
                     <x-select-option name="private" id="private" field="privacy status" :lists="$boolean" value="{{ $recipe->private }}" class="" />
                     <x-input-error :messages="$errors->get('private')" class="mt-2" />
+                </div>
+                <div class="my-4"> 
+                    <x-input-label for="is_draft" :value="__('Is draft?')"  class="font-semibold"/>
+                    <x-select-option name="is_draft" id="is_draft" field="privacy status" :lists="$boolean" value="{{ $recipe->is_draft }}" class="" />
+                    <x-input-error :messages="$errors->get('is_draft')" class="mt-2" />
                 </div>
                 <div class="flex flex-col my-4">
                     <x-input-label for="Ingredients" :value="__('Ingredients:')"  class="font-semibold"/>

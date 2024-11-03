@@ -11,7 +11,7 @@ class InputFile extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $id = 'attachment', public string $updateValue = "")
+    public function __construct(public string $id = 'attachment', public string $updateValue = "", public int $width=300, public int $height=300)
     {
         //
     }

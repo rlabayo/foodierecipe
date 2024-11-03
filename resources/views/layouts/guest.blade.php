@@ -8,18 +8,18 @@
         <title>{{ config('app.name', 'Recipe Book') }}</title>
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <link rel="icon" type="image/x-icon" href="{{ Storage::url('assets/images/logo.png') }}">
         
-        <link rel="icon" href="{{ Storage::url('assets/images/logo.png') }}" />
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @stack('style')
+        @stack('headerScript')
         
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-gradient-b from-[#fbece533] to-[#FFF] dark:bg-[#fbece533]/20">
-        <x-back-to-top></x-back-to-top>
         {{ $slot }}
 
         @stack('script')

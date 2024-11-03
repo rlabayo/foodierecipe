@@ -14,6 +14,10 @@ class Recipe extends Model
 
     protected $table = "recipes";
 
+    // protected $casts = [
+    //     'created_at' => 'datetime'
+    // ];
+
     protected $fillable = [
         'id',
         'user_id',
@@ -24,7 +28,7 @@ class Recipe extends Model
         'video_url',
         'image',
         'thumbnail',
-        'unit',
+        'is_draft',
         'private',
         'created_at',
         'updated_at',
@@ -34,23 +38,45 @@ class Recipe extends Model
         return $this->hasMany(Comment::class,'recipe_id');
     }
 
-    // Guest
+    /**
+     * Retrieve a paginated list of public recipes along with their associated profile images.
+     */
     public function get_public_recipes(){
         $items = Recipe::select('recipes.*', 'profiles.image AS profile_image')
                     ->leftJoin('profiles', 'recipes.user_id', '=', 'profiles.user_id')
                     ->where('recipes.private', '=', '0')
-                    ->orderBy('created_at', 'desc')->paginate(6)->onEachSide(5);
+                    ->where('recipes.is_draft', '=', '0')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(6)
+                    ->onEachSide(5);
 
         return $items;
     }
 
+    /**
+     * Get all recipes to display in member's wall 
+     */
+
     public function get_all_recipes() {
+        // $following = Follow::select('follow')->where('user_id', auth()->user()->id)->get();
+
+        // $orderBy = [];
+        // foreach($following as $item){
+        //     $temp['recipes.user_id'] = $item['follow'];
+        //     array_push($orderBy, $temp);
+        // }
+
         $items = Recipe::distinct()
                     ->select('recipes.*', 'profiles.image AS profile_image')
                     ->leftJoin('profiles', 'recipes.user_id', '=', 'profiles.user_id')
+                    ->leftJoin('follows', 'recipes.user_id', '=', 'follows.follow') 
                     ->where('recipes.user_id', '!=', auth()->user()->id)
-                    ->orderBy('recipes.id', 'desc')
+                    ->where('recipes.is_draft', '=', '0')
+                    ->orderBy('recipes.created_at', 'desc')
+                    ->orderBy('follows.id', 'desc')
                     ->paginate(6)->onEachSide(5);
+
+
         
         foreach($items as $key => $item){
             $favorite = Favorite::where('recipe_id', '=', $item->id)
@@ -66,8 +92,30 @@ class Recipe extends Model
                 $items[$key]->favorite_by = auth()->user()->id;
             }
         }
+        // order by following
         
         return $items;
     }
+
+    /**
+     * Get the recipe details
+     */
+    public function get_recipe_details($id){
+        // $recipe = DB::table('recipes')
+        //         ->select('recipes.*')
+        //         ->selectRaw('favorites.id as favorite_id, (CASE WHEN favorites.id IS NULL then 0 else 1 END) AS is_favorite')
+        //         ->leftJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
+        //         ->where('recipes.id', '=', $id)
+        //         ->get()[0];
+        $recipe = DB::table('recipes')
+            ->select('recipes.*')
+            ->selectRaw('favorites.id as favorite_id, (CASE WHEN favorites.id IS NULL then 0 else 1 END) AS is_favorite')
+            ->leftJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
+            ->where('recipes.id', '=', $id)
+            ->get();
+
+        return $recipe;
+    }
+
 
 }

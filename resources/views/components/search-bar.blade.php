@@ -1,8 +1,7 @@
 <div {{ $attributes->merge(['class' => 'py-2 relative text-gray-600', 'style' => '']) }} >
-    <form action="{{ route('search') }}" method="GET" id="search_form">
+    <form action="{{ route('search') }}" method="POST" id="search_form">
         @csrf
-        <input class="w-full px-8 text-sm border-[--input-border] focus:border-[--primary] focus:ring-[--primary] rounded-md shadow-sm"
-        type="search" name="search" id="search" placeholder="Search">
+        <input class="w-full px-8 text-sm border-[--input-border] focus:border-[--primary] focus:ring-[--primary] rounded-md shadow-sm" type="search" name="search" id="search" placeholder="Search">
         <button type="button" id="search_btn" class="absolute right-0 top-0 mt-5 mr-2" alt="Search button">
             <svg class="text-gray-600 h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"

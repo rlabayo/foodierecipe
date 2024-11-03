@@ -13,12 +13,22 @@ use Illuminate\View\View;
 
 class FavoriteController extends Controller
 {
+    public $follow;
+
+    public function __construct()
+    {
+        $this->follow = new Follow();
+    }
+
     public function index(Request $request): View 
     {
+        // Set custom url path for show recipe back button
+        session(['customPrevURL' => parse_url(url()->current(), PHP_URL_PATH)]);
+
         $user_id = $request->id != NULL ? $request->id : auth()->user()->id;
         $profile = Profile::where('user_id', '=', $user_id)->get();
         $user = User::find($user_id); 
-        
+
         return view('web.favorite.index', [
             'user' => $user,
             'profile' => $profile[0],
@@ -27,6 +37,8 @@ class FavoriteController extends Controller
             'total_post' => Recipe::where('user_id', $user_id)->count(),
             'total_follower' => Follow::where('follow', $user_id)->count(),
             'total_following' => Follow::where('user_id', $user_id)->count(),
+            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+            'userType' => 'member'
         ]);
     }
 

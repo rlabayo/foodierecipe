@@ -14,9 +14,10 @@
                 @csrf
                 <input type="hidden" name="user_id" value="{{ auth()->user()->id }}" />
                 <div class="my-4">
-                    <x-input-label for="image" :value="__('Image Banner:')" class="font-semibold"/>
+                    <x-input-label for="image" :value="__('Banner Image:')" class="font-semibold"/>
                     <x-input-file name="image" id="image" :value="old('image')" :width="1000" :height="559" />
                     <x-input-error :messages="$errors->get('image')" class="mt-2" />
+                    <p class="text-sm w-full">Recommendation: Compress images before uploading using <a href="https://tinypng.com/" alt="Tinyfy" class="text-red-500 font-bold">Tinyfy</a></p>
                 </div>
                 <div class="my-4">
                     <x-input-label for="title" :value="__('Title:')"  class="font-semibold"/>
@@ -35,8 +36,13 @@
                 </div>
                 <div class="my-4"> 
                     <x-input-label for="private" :value="__('Is private?')"  class="font-semibold"/>
-                    <x-select-option name="private" id="private" field="privacy status" :lists="$boolean"  class="" />
+                    <x-select-option name="private" id="private" field="privacy status" :lists="$boolean" class="" />
                     <x-input-error :messages="$errors->get('private')" class="mt-2" />
+                </div>
+                <div class="my-4"> 
+                    <x-input-label for="is_draft" :value="__('Is draft?')"  class="font-semibold"/>
+                    <x-select-option name="is_draft" id="is_draft" field="draft status" :lists="$boolean"  class="" />
+                    <x-input-error :messages="$errors->get('is_draft')" class="mt-2" />
                 </div>
                 <div class="flex flex-col my-4">
                     <x-input-label for="Ingredients" :value="__('Ingredients:')"  class="font-semibold"/>
@@ -51,7 +57,9 @@
                                 <x-text-input id="ingredients_item" class="block mt-1 w-full" type="text" placeholder="Ingredients item" autofocus />
                             </div>
                             <div class="w-1/3 flex justify-center items-center text-center ">
-                                <button type="button" class="rounded-full py-2 px-4 shadow-sm border-2 bg-[#F2AA85] text-white text-lg font-bold mx-1 hover:bg-white hover:border-[#F2AA85] hover:text-[#F2AA85]" id="add_item">+</button>
+                                <div class="mx-auto">
+                                    <button type="button" class="rounded-full py-2 px-4 shadow-sm border-2 bg-[#F2AA85] text-white text-lg font-bold mx-1 hover:bg-white hover:border-[#F2AA85] hover:text-[#F2AA85]" id="add_item">+</button>
+                                </div>
                             </div>
                         </div>
                         <!-- End for ingredients item entry -->
@@ -126,7 +134,7 @@
     <script src="{{ Storage::url('assets/js/instructions/select_photo.js') }}" defer></script>
     <script src="{{ Storage::url('assets/js/instructions/update_instruction_json_data.js') }}" defer></script>
 
-    <!-- Banner -->
+    <!-- Banner Image -->
     <script src="{{ Storage::url('assets/js/photo_preview.js') }}" defer></script>
 @endpush
 </x-app-layout>
