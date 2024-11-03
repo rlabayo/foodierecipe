@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 
-    'allowed_origins' => ['http://192.168.100.8:8000/', 'http://127.0.0.1:8000/', '*.rhealabayo.com'],
+    'allowed_origins' => ['http://192.168.100.8:8000/', 'http://127.0.0.1:8000/', '*.rhealabayo.site'],
 
     'allowed_origins_patterns' => [],
 

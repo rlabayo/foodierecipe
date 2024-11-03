@@ -37,12 +37,12 @@
                 </div>
                 <div class="flex flex-wrap items-center justify-center mt-4">
                     @if (Route::has('password.request'))
-                        <p class="text-[#5C636E] text-sm">
+                        <!-- <p class="text-[#5C636E] text-sm">
                             {{ __('Don’t have an account yet? ') }}
                         </p>
                         <a class="no-underline text-sm text-[--primary] font-bold dark:text-gray-400 hover:text-[--secondary] dark:hover:text-[--secondary] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 md:ml-2" href="{{ route('register') }}">
                          Create account
-                        </a>
+                        </a> -->
                     @endif
                 </div>
             </form>

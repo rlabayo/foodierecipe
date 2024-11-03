@@ -23,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'admin_verified'
     ];
 
     /**
@@ -43,10 +45,15 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'admin_verified' => 'boolean'
     ];
 
     public function profile(): HasOne {
         return $this->hasOne(Profile::class, 'user_id');
+    }
+
+    public function recipes(): HasMany {
+        return $this->hasMany(Recipe::class, 'user_id');
     }
 
     public function favorite(): HasMany{
@@ -56,5 +63,7 @@ class User extends Authenticatable
                             ->rightJoin('profiles', 'profiles.user_id', '=', 'recipes.user_id')
                             ->orderBy('favorites.id', 'desc');
     }
+
+
 
 }

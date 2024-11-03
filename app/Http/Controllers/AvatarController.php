@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateAvatarRequest;
+use App\Libraries\ImageLibrary;
+use App\Logging\CustomFile;
 use App\Models\Profile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -12,6 +13,14 @@ use Intervention\Image\Facades\Image;
 
 class AvatarController extends Controller
 {
+
+    public $image_library;
+
+    public function __construct()
+    {
+        $this->image_library = new ImageLibrary();
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -28,12 +37,12 @@ class AvatarController extends Controller
                     Storage::disk('public')->makeDirectory($path);
                 }
                 
-                if(Storage::disk('public')->exists($profile[0]->image) && $profile[0]->image != 'assets/images/default_profile.svg'){
-                    Storage::disk('public')->delete($profile[0]->image);
+                if($profile[0]->image != 'assets/images/default_profile.svg'){
+                    $this->image_library->delete_stored_image($profile[0]->image); // original image
                 }
 
-                if(Storage::disk('public')->exists($profile[0]->thumbnail) && $profile[0]->thumbnail != 'assets/images/default_profile.svg'){
-                    Storage::disk('public')->delete($profile[0]->thumbnail);
+                if($profile[0]->thumbnail != 'assets/images/default_profile.svg'){
+                    $this->image_library->delete_stored_image($profile[0]->thumbnail); // thumbnail
                 }
 
                 // image resize logic
@@ -50,6 +59,7 @@ class AvatarController extends Controller
                     $new_avatar_image->fit(100, 100, function($constraint) {
                         $constraint->upsize();
                     });
+
                     $filename_avatar = 'avatar.' . $file->getClientOriginalExtension();
                     $new_avatar_image->save(storage_path('app/public' . $path . '/' . $filename_avatar));
                     $profile[0]->image = $path . '/' . $filename_avatar;
@@ -70,7 +80,12 @@ class AvatarController extends Controller
             return redirect(route('profile.edit'))->with('status','avatar-updated');
             
         }catch(Throwable $e){
-            // return redirect(route('profile.edit'))->with('status','error');
+            // Call in controller
+            CustomFile::index('AvatarController', 'error', [
+                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            ]);
+            
+            return back()->withInput()->with('status', 400);
         }
     }
 }

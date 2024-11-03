@@ -1,7 +1,7 @@
 @push('headerScript')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 @endpush
-<div style="background-image: url('{{ Storage::url($recipe->image)}}');" {{ $attributes->merge(['class' => 'flex flex-col justify-between bg-fixed bg-cover resize-y md:bg-center bg-center bg-[#D99877]/30 px-4 md:h-[550px] h-[450px]']) }} >
+<div style="background-image: url('{{ Storage::url($recipe->image)}}');" {{ $attributes->merge(['class' => 'flex flex-col justify-between md:bg-fixed bg-cover bg-no-repeat resize-y bg-center bg-[#D99877]/30 px-4 md:h-[550px] min-h-[300px] hover:bg-contain hover:bg-auto']) }} >
     <div class="flex justify-between pt-4">
         <div class="flex justify-start space-x-1">
             @if(URL::previous() != URL::current())
@@ -45,7 +45,7 @@
         </div>
     </div>
     @if($recipe->video_url != '')
-        <div class="flex justify-center">
+        <div class="flex justify-center relative">
             <a href="{{ $recipe->video_url }}" rel="noreferrer" target="__blank" class="px-12 py-2 bg-[--primary] rounded shadow-lg text-white font-semibold mb-[-20px]">Watch Video</a>
         </div>
     @endif

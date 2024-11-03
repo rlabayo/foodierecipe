@@ -7,16 +7,16 @@
                 <img src="{{Storage::url('assets/images/')}}{{$profile->image}}" alt="" class="rounded-full md:ml-auto mx-auto" width="120" height="120" />
             @endif
         </div>
-        <div class="flex flex-col mr-auto md:w-2/3 w-full">
+        <div class="flex flex-col mr-auto lg:w-2/3 w-full">
             <div class="flex md:justify-start justify-center md:mt-0 mt-4 gap-2">
                 <h1 class="text-[--secondary] md:text-1xl text-xl font-semibold">{{ $username }}</h1>
                 <div class="group flex relative mb-auto">
-                    @if(auth()->user()->id == $profile->user_id)
-                    <a href="{{ route('profile.edit') }}" class="px-2 py-1" tooltip="Edit Profile">
-                        <img src="{{ Storage::url('assets/images/icons/edit.svg') }}" alt="Edit Profile" class="fill-white">
-                    </a>
+                    @if((auth()->user()->id == $profile->user_id))
+                        <a href="{{ route('profile.edit') }}" class="px-2 py-1" tooltip="Edit Profile" >
+                            <img src="{{ Storage::url('assets/images/icons/edit.svg') }}" alt="Edit Profile" class="fill-white">
+                        </a>
                     @else 
-                        @if($following <= 0)
+                        @if($isFollow <= 0)
                             <a href="{{ route('follow', $profile->user_id) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-2xl hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
                                 Follow
                             </a>
@@ -55,9 +55,14 @@
             </div>
             <div class="mt-4 md:mx-0 mx-auto">
                 @if(auth()->user()->id == $profile->user_id)
-                    <a href="{{ route('recipe.create') }}">
-                        <x-primary-button >{{ __('Create Recipe') }}</x-primary-button>
-                    </a>
+                    @if((auth()->user()->admin_verified == 1))
+                        <a href="{{ route('recipe.create') }}">
+                            <x-primary-button >{{ __('Create Recipe') }}</x-primary-button>
+                        </a>
+                        <a href="{{ route('drafts') }}">
+                            <x-secondary-button >{{ __('Drafts') }}</x-secondary-button>
+                        </a>
+                    @endif
                 @endif
             </div>
         </div>

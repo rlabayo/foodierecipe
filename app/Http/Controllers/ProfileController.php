@@ -21,11 +21,21 @@ use Illuminate\Support\Facades\File;
 
 class ProfileController extends Controller
 {
+    public $follow;
+
+    public function __construct()
+    {
+        $this->follow = new Follow();
+    }
+
     public function index(Request $request)//: View 
     {
+        // Set custom url path for show recipe back button
+        session(['customPrevURL' => parse_url(url()->current(), PHP_URL_PATH)]);
+
         $user_id = $request->id != NULL ? $request->id : auth()->user()->id;
         $profile = Profile::where('user_id', '=', $user_id)->get();
-        $recipes = Recipe::where('user_id', $user_id)->latest()->get();
+        $recipes = Recipe::where(['user_id' => $user_id, 'is_draft' => '0'])->latest()->get();
         $user = User::find($user_id);
         
         if($user == null) {
@@ -46,15 +56,8 @@ class ProfileController extends Controller
                     $recipes[$key]->favorite_by = $favorite_result[0]->favorite_by;
                 }
             }
-
-            $is_following = Follow::where([
-                ['user_id' , '=', auth()->user()->id],
-                ['follow' , '=', $request->id]
-            ])->get()->count();
-            
-            $following = $is_following > 0 ? true : false;
         }
-        
+
         return view('web.profile.index', [
             'user' => $user,
             'profile' => $profile[0],
@@ -63,7 +66,8 @@ class ProfileController extends Controller
             'total_post' => Recipe::where('user_id', $user_id)->count(),
             'total_follower' => Follow::where('follow', $user_id)->count(),
             'total_following' => Follow::where('user_id', $user_id)->count(),
-            'following' => isset($following) ? $following : false
+            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+            'userType' => 'member'
         ]);
     }
 
@@ -74,7 +78,8 @@ class ProfileController extends Controller
 
         $user = User::find($request->id);
         $favorite_list = $user->favorite()->get();
-        
+
+
         return view('web.profile.index', [
             'user' => $user,
             'profile' => $profile[0],
@@ -193,5 +198,48 @@ class ProfileController extends Controller
 
             return back()->with('status', 'error-deleted');
         }
+    }
+
+    public function drafts(Request $request){
+
+        // Set custom url path for show recipe back button
+        session(['customPrevURL' => parse_url(url()->current(), PHP_URL_PATH)]);
+
+        $user_id = $request->id != NULL ? $request->id : auth()->user()->id;
+        $profile = Profile::where('user_id', '=', $user_id)->get();
+        $recipes = Recipe::where(['user_id' => $user_id, 'is_draft' => '1'])->latest()->get();
+        $user = User::find($user_id);
+        
+        if($user == null) {
+            return redirect(route('profile.error404'));
+        }
+        
+        if($request->id != auth()->user()->id){
+            $favorite_model = new Favorite();
+
+            // check if the recipes are user's favorites
+            foreach($recipes as $key => $item){
+                $favorite_result = $favorite_model->is_favorite(auth()->user()->id, $item['id']);
+                
+                // if recipe is a favorite of the current user
+                if($favorite_result != false){
+                    $recipes[$key]->favorite_id = $favorite_result[0]->favorite_id;
+                    $recipes[$key]->is_favorite = 1;
+                    $recipes[$key]->favorite_by = $favorite_result[0]->favorite_by;
+                }
+            }
+        }
+
+        return view('web.profile.index', [
+            'user' => $user,
+            'profile' => $profile[0],
+            'recipes' => $recipes,
+            'total_favorite' => $user->favorite()->get()->count(),
+            'total_post' => Recipe::where('user_id', $user_id)->count(),
+            'total_follower' => Follow::where('follow', $user_id)->count(),
+            'total_following' => Follow::where('user_id', $user_id)->count(),
+            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+            'userType' => 'member'
+        ]);
     }
 }

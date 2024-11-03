@@ -1,31 +1,32 @@
 function attachment(id){
-    var width = document.getElementById('width_preview').value
-    var height = document.getElementById('height_preview').value
-    const [file] = document.getElementById(id).files
-    var filetypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+  var width = document.getElementById('width_preview').value
+  var height = document.getElementById('height_preview').value
+  const [file] = document.getElementById(id).files
+  var filetypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 
-    // const MAX_FILE_SIZE = 2048
-    const MAX_FILE_SIZE = 2097152 // bytes , 2mb
-    
-    document.getElementById('file_error_' + id).innerHTML = "";
-    
-    if(!filetypes.includes(file.type)){
-        document.getElementById(error_span).innerHTML = "The attachment field must be a file of type: jpg, jpeg, png, webp.";
-    }else{
-        if(file.size <= MAX_FILE_SIZE){
-            if (file) {
-              document.getElementById('preview_container_' + id).style.display = '';
-              document.getElementById('preview_container_' + id).innerHTML = "";
+  // const MAX_FILE_SIZE = 2048
+  const MAX_FILE_SIZE = 2097152 // bytes , 2mb
+  
+  document.getElementById('file_error_' + id).innerHTML = "";
+  
+  // Check if the given image file type is valid
+  if(!filetypes.includes(file.type)){
+      document.getElementById('file_error_' + id).innerHTML = "The attachment field must be a file of type: jpg, jpeg, png, webp.";
+  }else{
+      if(file.size <= MAX_FILE_SIZE){
+          if (file) {
+            document.getElementById('preview_container_' + id).style.display = '';
+            document.getElementById('preview_container_' + id).innerHTML = "";
 
-              createBlobImage(document.getElementById(id).files, id, display_image, width, height) 
-            }
-        }else{
-          document.getElementById('file_error_' + id).innerHTML = "The attachment exceeded the maximum file size of 2MB. Your image file size is " + (file.size / 1048576).toFixed(2) + ' mb';
-          document.getElementById('preview_container_' + id).innerHTML = "";
-          document.getElementById('preview_container_' + id).innerHTML = '<img src="/storage/assets/images/icons/img_logo.svg" alt="Image logo" class="m-auto my-auto py-1" />'+
-            '<span class="text-center text-[12px] py-1 px-2 leading-tight">File size maximum of 2mb</span>';
-        }
-    }
+            createBlobImage(document.getElementById(id).files, id, display_image, width, height) 
+          }
+      }else{
+        document.getElementById('file_error_' + id).innerHTML = "The attachment exceeded the maximum file size of 2MB. Your image file size is " + (file.size / 1048576).toFixed(2) + ' mb';
+        document.getElementById('preview_container_' + id).innerHTML = "";
+        document.getElementById('preview_container_' + id).innerHTML = '<img src="/storage/assets/images/icons/img_logo.svg" alt="Image logo" class="m-auto my-auto py-1" />'+
+          '<span class="text-center text-[12px] py-1 px-2 leading-tight">File size maximum of 2mb</span>';
+      }
+  }
 }
 
 function createBlobImage(imageData, id, funct_display_image, custom_width, custom_height) {

@@ -9,10 +9,16 @@
 
 ## About FoodieRecipe
 
-Foodie Recipe is a website application with the ability to organize the recipe that the user wants to share with other people, and this is a good application to easily note the ingredients and instructions of the dish that the user already tried to cook. Some of the features that Foodie Recipe can do are:
-- [Viewing public recipes that have been shared by other Foodie.](https://foodierecipe.rhealabayo.com/).
-- By creating your own account, you will have the ability to share your own recipe and add the other foodie recipes to the list of your favorites so that you can easily find the dish that you want to repeatedly cook.
-- Account user can also follow each others account.
+Foodie Recipe is a web application designed to help users organize and share their favorite recipes. It allows users to easily note the ingredients and instructions for dishes they've tried cooking, making it a convenient tool for food enthusiasts to keep track of their culinary adventures. 
+
+Some of the features that Foodie Recipe offers include:
+1. <b>[Public Recipes](https://foodierecipe.rhealabayo.site/)</b> - Viewing public recipes shared by other Foodie users.
+2. <b>Members</b> - Currently, the creation of new accounts is hidden; only the website owner can manage user accounts, as this web application is intended for personal use at this time.
+3. <b>Create, Update, View and Delete Recipe</b> - Members of the Foodie Recipe web application can create their own recipes, update them as needed, view their recipes and those of others, and delete recipes they no longer wish to share. 
+4. <b>Follow Members</b> - Members can follow one another's accounts to stay updated on their shared recipes and activities.
+5. <b>Favorite Recipes</b> - Add recipes from other members to your favorites list, making it easy to find dishes when needed.
+6. <b>Search</b> - Users can use the search functionality to find recipes and users.
+
 
 
 <!-- ### Premium Partners

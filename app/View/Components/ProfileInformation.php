@@ -11,7 +11,7 @@ class ProfileInformation extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(public object $profile, public string $userId = '', public string $username = '', public string $postCount = '', public string $favoriteCount = '', public int $totalFollowing = 0, public int $totalFollower = 0, public bool $following = false)
+    public function __construct(public object $profile, public string $userId = '', public string $username = '', public string $postCount = '', public string $favoriteCount = '', public int $totalFollowing = 0, public int $totalFollower = 0, public bool $isFollow = false)
     {
         
     }

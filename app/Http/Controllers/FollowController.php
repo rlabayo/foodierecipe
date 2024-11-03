@@ -7,9 +7,17 @@ use App\Models\Profile;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
 
 class FollowController extends Controller
 {
+    public $follow;
+
+    public function __construct()
+    {
+        $this->follow = new Follow();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -32,7 +40,7 @@ class FollowController extends Controller
             $followers[$key]['follower_id'] = $value['user_id'];
             
         }
-        
+
         return view('web.follower.index', [
             'user' => $user,
             'profile' => $profile[0],
@@ -41,6 +49,8 @@ class FollowController extends Controller
             'total_post' => Recipe::where('user_id', $user_id)->count(),
             'total_follower' => Follow::where('follow', $user_id)->count(),
             'total_following' => Follow::where('user_id', $user_id)->count(),
+            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+            'userType' => 'member'
         ]);
     }
 
@@ -63,16 +73,17 @@ class FollowController extends Controller
             $following[$key]['email'] = $profile_details['email'];
             $following[$key]['following_id'] = $value['follow'];
         }
-        
 
         return view('web.following.index', [
             'user' => $user,
             'profile' => $profile[0],
-            'following' => $following,
+            'following_list' => $following,
             'total_favorite' => $user->favorite()->get()->count(),
             'total_post' => Recipe::where('user_id', $user_id)->count(),
             'total_follower' => Follow::where('follow', $user_id)->count(),
             'total_following' => Follow::where('user_id', $user_id)->count(),
+            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+            'userType' => 'member'
         ]);
     }
 
@@ -92,7 +103,8 @@ class FollowController extends Controller
                 ]);
         $follow->delete();
 
-        return redirect(route('profile.index', $request->id));
+        // return redirect(route('profile.index', $request->id));
+        return Redirect::back();
     }
 
     public function removeFollower(Request $request){
@@ -100,6 +112,7 @@ class FollowController extends Controller
             ['user_id', '=', $request->id],
             ['follow', '=', auth()->user()->id]
         ]);
+
         $follow->delete();
 
         return redirect(route('profile.index', auth()->user()->id));

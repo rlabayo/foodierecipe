@@ -36,5 +36,12 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
+
+        // Global constraint for route parameter
+        Route::pattern('id', '[0-9]+');
+        
+        Route::fallback(function () {
+            return redirect()->route('error404');
+        });
     }
 }

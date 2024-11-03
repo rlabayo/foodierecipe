@@ -31,6 +31,7 @@ class CommonLibrary {
 
         return $recommendation_list;
     }
+
 }
 
 ?>

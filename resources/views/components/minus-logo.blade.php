@@ -1,0 +1,1 @@
+<button {{ $attributes->merge(['class' => 'bg-white border-[--primary] rounded-full px-2.5 py-1 text-[--primary] font-bold']) }}>-</button>

@@ -2,14 +2,13 @@
     @push('headerScript')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     @endpush
+    <x-profile-information :profile="$profile" :userId="$user->id" :username="$user->name" :postCount="$total_post" :favoriteCount="$total_favorite" :totalFollowing="$total_following" :totalFollower="$total_follower" :isFollow="$is_follow"></x-profile-information>
     
-    <x-profile-information :profile="$profile" :userId="$user->id" :username="$user->name" :postCount="$total_post" :favoriteCount="$total_favorite" :totalFollowing="$total_following" :totalFollower="$total_follower" ></x-profile-information>
-    
-    <div class="min-h-[50vh] md:w-1/2 w-full h-auto mx-auto pb-4 px-4">
-        <div class="flex flex-wrap justify-center mt-4 px-1">
+    <div class="min-h-[50vh] md:w-1/2 w-full h-auto mx-auto">
+        <div class="flex flex-wrap justify-center mt-4">
             <!-- Display the profile details of the followers-->
             @foreach($followers as $item)
-                <div class="flex w-full min-h-[100px] my-1 items-center justify-around space-x-4">
+                <div class="flex w-full min-h-[100px] my-1 items-center justify-between space-x-4 gap-1 px-2">
                     <div class="flex gap-4">
                         <div>
                             <img src="{{ Storage::url($item['image']) }}" alt="{{$item['name']}}" width="50" height="50" class="rounded-full"/>

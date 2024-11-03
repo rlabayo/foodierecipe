@@ -1,11 +1,11 @@
 @props(['width', 'height'])
 
-<label class="flex flex-col hover:bg-[#ffc5a82e] hover:bg-blend-darken">
-    <div id="preview_container_{{$id}}" class="flex flex-col items-center justify-center w-auto bg-[#F2AA85] hover:bg-white rounded-md border-2 border-sm hover:border-2 border-[#F2AA85] ring-[#F2AA85] border-dashed shadow-md">
+<label class="flex flex-col hover:bg-[#ffc5a82e] hover:bg-blend-darken h-full w-full">
+    <div id="preview_container_{{$id}}" class="flex flex-col items-center justify-center bg-[#F2AA85] hover:bg-white rounded-md border-2 border-sm hover:border-2 border-[#F2AA85] ring-[#F2AA85] border-dashed shadow-md h-full w-full" >
         @if($updateValue != '') 
-            <img src="{{ Storage::url($updateValue) }}" alt="Preview Image" class="my-auto" width="{{$width}}" height="{{$height}}"/>
+            <img src="{{ Storage::url($updateValue) }}" alt="Preview Image" class="my-auto"/>
         @else
-            <img src="{{Storage::url('assets/images/icons/img_logo.svg')}}" alt="Image logo" class="m-auto my-auto py-1" />
+            <img src="{{Storage::url('assets/images/icons/img_logo.svg')}}" alt="Image logo" class="m-auto my-auto py-1 h-max" />
             <span class="text-center text-[12px] py-1 px-2 leading-tight">File size maximum of 2mb</span>
         @endif
     </div>

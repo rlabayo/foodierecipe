@@ -6,6 +6,9 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Logging\CustomFile;
 use App\Models\Comment;
+use App\Models\Profile;
+use App\Models\Recipe;
+use App\Models\User;
 use Throwable;
 
 class CommentController extends Controller
@@ -116,5 +119,21 @@ class CommentController extends Controller
 
             return back();
         }
+    }
+
+    /**
+     * Get comments
+     */
+
+    public function get_comments_by_user_id($id)
+    {
+        $comments = Recipe::find($id)->comments()->latest()->paginate(5);
+
+        foreach($comments as $key => $comment){
+            $comments[$key]->profile_thumbnail = Profile::find(['user_id', $comment->user_id])[0]->image;
+            $comments[$key]->profile_name = User::select('name')->where('id', $comment->user_id)->get()[0]->name;
+        }
+
+        return $comments;
     }
 }

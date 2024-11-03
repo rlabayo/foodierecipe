@@ -26,7 +26,7 @@ class StoreRecipeRequest extends FormRequest
             'summary' => ['required'],
             'ingredients' => ['required'],
             'instruction' => ['required'],
-            'unit' => ['string'],
+            'is_draft' => 'boolean',
             'video_url' => ['sometimes', 'nullable', 'url'],
             'image' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,JPG,PNG,JPEG,WEBP','max:2048'],
             'private' => 'boolean'
