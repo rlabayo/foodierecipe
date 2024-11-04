@@ -1,9 +1,9 @@
-<div {{ $attributes->merge(['class' => 'py-2 bg-[#faf7f526]/10 hover:bg-[#faf7f526]/30 hover:text-gray-800 hover:font-bold ']) }} > 
-    <div class="w-full flex justify-around items-center h-[10%] md:mt-2 mt-2"> 
+<div {{ $attributes->merge(['class' => 'bg-[#faf7f526]/10 hover:bg-[#faf7f526]/30 hover:text-gray-800 hover:font-bold ']) }} > 
+    <div class="w-full flex justify-around items-center h-[10%] mt-2"> 
         @if(!strpos(parse_url(url()->current(), PHP_URL_PATH), "profile") && !strpos(parse_url(url()->current(), PHP_URL_PATH), "drafts"))
         <div class="mr-auto ml-4">
             <a href="{{ route('profile.show', $item->user_id) }}" alt="{{ $item->user_id }}">
-                <img src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}"  class="rounded-full md:h-[50px] h-[30px] md:w-[50px] w-[30px]" />
+                <img src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}"  class="rounded-full h-[50px] w-[50px]" />
             </a>
         </div>
         @endif
@@ -60,7 +60,7 @@
     </div>
     @guest
         <a href="{{route('guest.show', $item->id)}}" alt="{{ $item->title }}" class="w-full md:mt-auto my-auto text-center items-center text-wrap">   
-            <h1 class="text-white md:text-3xl text-lg leading-auto min-h-20 px-4 py-3 rounded-sm font-semibold hover:text-gray-800 hover:font-bold">
+            <h1 class="text-white md:text-3xl text-2xl leading-auto min-h-20 px-4 py-3 rounded-sm font-semibold hover:text-gray-800 hover:font-bold">
             {{ $item->title }} 
             </h1>
         </a>
@@ -68,7 +68,7 @@
 
     @auth
         <a href="{{ route('recipe.show', $item->id) }}" alt="{{ $item->title }}" class="w-full md:mt-auto my-auto text-center items-center text-wrap">   
-            <h1 class="text-white md:text-3xl text-lg leading-auto min-h-20 px-4 py-3 rounded-sm font-semibold hover:text-gray-800 hover:font-bold">
+            <h1 class="text-white md:text-3xl text-2xl leading-auto min-h-20 px-4 py-3 rounded-sm font-semibold hover:text-gray-800 hover:font-bold">
             {{ $item->title }} 
             </h1>
         </a> 
