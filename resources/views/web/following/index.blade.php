@@ -9,17 +9,12 @@
             <!-- Display the profile details of the following-->
             @foreach($following_list as $item)
                 <div class="flex w-full min-h-[100px] my-1 items-center justify-between space-x-4 gap-1 px-2">
-                    <div class="w-2/3 flex gap-4">
-                        <div>
-                            <img src="{{ Storage::url($item['image']) }}" alt="{{$item['name']}}" width="50" height="50" class="rounded-full"/>
-                        </div>
-                        <div>
-                            <a href="{{ route('profile.show', $item['following_id']) }}" alt="Go to profile"><h5 class="font-semibold">{{$item['name']}}</h5></a>
-                            <p>{{$item['email']}}</p>
-                            <p class="italic text-sm">{{$item['description']}}</p>
-                        </div>
+                    <div class="w-2/3 items-center">
+                        <img src="{{ Storage::url($item['image']) }}" alt="{{$item['name']}}" width="50" height="50" class="rounded-full"/>
+                        <a href="{{ route('profile.show', $item['following_id']) }}" alt="Go to profile"><h5 class="font-semibold">{{$item['name']}}</h5></a>
+                        <p>{{$item['email']}}</p>
                     </div>
-                    <div class="w-1/3 ml-auto space-x-1 md:space-y-0 space-y-1 flex flex-wrap text-center items-center">
+                    <div class="w-1/3 ml-auto gap-1 flex flex-wrap text-center items-center">
                         <a href="{{ route('profile.show', $item['following_id']) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-full hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
                             See Profile
                         </a>

@@ -3,7 +3,7 @@
     <div class="min-h-[50vh] h-auto mx-auto pb-4 md:px-4 px-0">
         <div class="flex flex-wrap justify-start mt-4">
             @foreach($items as $item)
-                <div class="bg-cover flex flex-col rounded-sm w-full md:max-w-[33%] max-w-[48%] md:h-[300px] min-h-[200px] items-center shadow-md bg-blend-overlay md:py-2 py-4 bg-center md:m-[1px] m-[.5px] mx-auto bg-[#faf7f526]/10 hover:bg-[#faf7f526]/30 hover:text-gray-800 hover:font-bold " style="background-image: url('{{ Storage::url($item->thumbnail)}}')">
+                <div class="bg-cover flex flex-col rounded-sm md:max-w-[33%] w-[49.8%] md:h-[300px] h-[200px] items-center shadow-md bg-blend-overlay md:py-2 py-4 bg-center md:m-[1px] m-[.5px] mx-auto bg-[#faf7f526]/10 hover:bg-[#faf7f526]/30 hover:text-gray-800 hover:font-bold " style="background-image: url('{{ Storage::url($item->thumbnail)}}')">
                     <div class="w-full flex justify-around items-center h-[20%]">
                         <div class=" mt-4 mr-auto ml-2 ">
                             <a href="{{ route('profile.show', $item->user_id) }}" alt="{{ $item->user_id }}">
