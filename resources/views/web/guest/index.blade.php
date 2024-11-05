@@ -8,7 +8,4 @@
         </div>
         <div class="px-4 my-4">{{ $items->links() }}</div>
     </div>
-    <div class=" mx-auto py-4 px-4 max-w-7xl">
-        <i class="text-[--dark-grey] text-sm mt-2 text-center">Note: To log in, use this test account for testing purposes only. Username: testuser@yahoo.com Password: password12345</i>
-    </div>
 </x-app-layout>
