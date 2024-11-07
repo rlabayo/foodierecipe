@@ -53,7 +53,15 @@
         </p>
         <p class="text-[--text-secondary] text-sm text-center font-[350] md:leading-normal leading-[1.2rem] mt-2"> {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} </p>
         
-        <img src="{{ Storage::url($recipe->image) }}" alt="Recipe photo" class="my-4 md:h-[550px] min-h-[300px] mx-auto rounded-lg shadow-md" />
+        <div class="flex bg-cover w-full md:min-h-[550px] min-h-[300px] rounded-lg" style="background-image: url({{Storage::url($recipe->image)}})">
+            @if($recipe->video_url != '')
+                <a href="{{ $recipe->video_url }}" rel="noreferrer" target="__blank" class="w-0 h-0 
+                border-t-[50px] border-t-transparent
+                border-l-[75px] border-l-[#ffaf8781] hover:border-l-[--primary]
+                border-b-[50px] border-b-transparent
+                mx-auto my-auto"></a>
+            @endif
+        </div>
         
         <!-- Display list of ingredients -->
         <div class="mt-4 md:hidden block">
@@ -82,7 +90,7 @@
         </div>
     </div>
 </div>
-<div class="md:w-1/4 w-full md:px-4 text-[--secondary] md:bg-gradient-to-b bg-gradient-0 md:from-[#fff7f3] md:to-white md:block hidden">
+<div class="md:w-1/4 w-full md:pt-20 pt-0 md:px-4 text-[--secondary] md:bg-gradient-to-b bg-gradient-0 md:from-[#fff7f3] md:to-white md:block hidden">
     <!-- Display list of ingredients -->
     <h2 class="md:text-2xl text-xl font-semibold md:mt-20 my-4 px-2 py-4 border-b-2 border-b-[--primary]">Ingredients:</h2>
     <ul class="px-4 mx-4 list-disc">
