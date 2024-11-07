@@ -53,7 +53,7 @@
         </p>
         <p class="text-[--text-secondary] text-sm text-center font-[350] md:leading-normal leading-[1.2rem] mt-2"> {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} </p>
         
-        <div class="flex bg-cover bg-center w-full md:min-h-[550px] min-h-[300px] rounded-lg mt-4" style="background-image: url({{Storage::url($recipe->image)}})">
+        <div class="flex w-full md:min-h-[550px] min-h-[300px] rounded-lg mt-6 bg-cover bg-center" style="background-image: url({{Storage::url($recipe->image)}})">
             @if($recipe->video_url != '')
                 <a href="{{ $recipe->video_url }}" rel="noreferrer" target="__blank" class="w-0 h-0 
                 border-t-[50px] border-t-transparent
