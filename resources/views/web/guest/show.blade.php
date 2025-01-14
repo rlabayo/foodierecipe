@@ -9,4 +9,5 @@
         </div>
     </div>
     <x-list-comment class="max-w-7xl mr-auto md:w-2/3 w-full md:px-20 px-4 my-10" :comments="$comments" :totalComments="$total_comments" :recipeCreator="$recipe->user_id" ></x-list-comment>
+    <x-footer></x-footer>
 </x-app-layout>

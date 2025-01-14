@@ -82,8 +82,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/favorite/add/{id}', [FavoriteController::class, 'add'])->name('favorite.add');
     Route::get('/favorite/remove/{id}', [FavoriteController::class, 'remove'])->name('favorite.remove');
 
+    Route::get('/favorite/error/404', function(){
+        $message = "Error encountered from displaying the favorite page.";
+            
+        return view('errors.favorite_404', compact('message'));
+    })->name('favorite.error404');
+
     // Comments
-    Route::post('/comment/{id}', [CommentController::class, 'store'])->name('comment.add');
+    Route::post('/comment', [CommentController::class, 'store'])->name('comment.add');
     Route::patch('/comment', [CommentController::class, 'update'])->name('comment.update');
     Route::delete('/comment/{id}', [CommentController::class, 'destroy'])->name('comment.destroy');
 
@@ -107,6 +113,8 @@ Route::get('/recipe/error/404', function(){
         
     return view('errors.recipe_404', compact('message'));
 })->name('error404');
+
+
 
 Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');

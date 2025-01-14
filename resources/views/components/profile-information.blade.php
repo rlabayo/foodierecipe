@@ -17,11 +17,11 @@
                         </a>
                     @else 
                         @if($isFollow <= 0)
-                            <a href="{{ route('follow', $profile->user_id) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-2xl hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
+                            <a href="{{ route('follow', Crypt::encrypt($profile->user_id)) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-2xl hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
                                 Follow
                             </a>
                         @else
-                            <a href="{{ route('unfollow', $profile->user_id) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-2xl hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
+                            <a href="{{ route('unfollow', Crypt::encrypt($profile->user_id)) }}" class="bg-[--primary] text-sm text-white py-1 px-2 rounded-2xl hover:ring-1 hover:ring-[--primary] hover:bg-white hover:text-[--primary] hover:font-semibold">
                                 Unfollow
                             </a>
                         @endif
@@ -38,19 +38,19 @@
                 @endphp
                 <div class="flex flex-col text-center ">
                     <p class="font-bold md:text-md text-sm">{{ $postCount }}</p>
-                    <a href="{{ route('profile.index', $userId) }}" class="md:text-md text-sm text-[--secondary] cursor-pointer {{$post_classes}}">posts</a>
+                    <a href="{{ route('profile.index', Crypt::encrypt($userId)) }}" class="md:text-md text-sm text-[--secondary] cursor-pointer {{$post_classes}}">posts</a>
                 </div>
                 <div class="flex flex-col text-center ">
                     <p class="font-bold  md:text-md text-sm">{{ $favoriteCount }}</p>
-                    <a href="{{ route('favorite.index', $userId) }}" alt="Favorites" class="md:text-md text-sm text-[--secondary] {{$favorite_classes}}">favorites</a>
+                    <a href="{{ route('favorite.index', Crypt::encrypt($userId)) }}" alt="Favorites" class="md:text-md text-sm text-[--secondary] {{$favorite_classes}}">favorites</a>
                 </div>
                 <div class="flex flex-col text-center ">
                     <p class="font-bold md:text-md text-sm">{{ $totalFollower }}</p>
-                    <a href="{{ route('follower', $userId) }}" alt="Follower" class="md:text-md text-sm text-[--secondary] cursor-pointer {{$followers_classes}}">followers</a>
+                    <a href="{{ route('follower', Crypt::encrypt($userId)) }}" alt="Follower" class="md:text-md text-sm text-[--secondary] cursor-pointer {{$followers_classes}}">followers</a>
                 </div>
                 <div class="flex flex-col text-center ">
                     <p class="font-bold  md:text-md text-sm">{{ $totalFollowing }}</p>
-                    <a href="{{ route('following', $userId) }}" alt="Following" class="md:text-md text-sm text-[--secondary] {{$following_classes}}">following</a>
+                    <a href="{{ route('following', Crypt::encrypt($userId)) }}" alt="Following" class="md:text-md text-sm text-[--secondary] {{$following_classes}}">following</a>
                 </div>
             </div>
             <div class="mt-4 md:mx-0 mx-auto">

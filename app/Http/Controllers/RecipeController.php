@@ -13,6 +13,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class RecipeController extends Controller
 {
@@ -50,36 +52,42 @@ class RecipeController extends Controller
     public function store(StoreRecipeRequest $request)
     {
         try{
-            $validated = $request->validated();
-            $user_id = auth()->user()->id;
-            $image_banner = "";
-            $image_thumbnail = "";
-            
-            if($request->hasFile('image')){
-                // Upload images to storage and get the image path name
-                $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
-                $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
-            }
+            DB::beginTransaction();
 
-            // upload images and update the json instruction data with the image path name
-            $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
+                $validated = $request->validated();
+                $user_id = auth()->user()->id;
+                $image_banner = "";
+                $image_thumbnail = "";
+                
+                if($request->hasFile('image')){
+                    // Upload images to storage and get the image path name
+                    $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
+                    $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
+                }
 
-            Recipe::create([
-                'user_id' => $user_id,
-                'title' => $validated['title'],
-                'summary' => $validated['summary'],
-                'ingredients' => $validated['ingredients'],
-                'instruction' => json_encode($instructions),
-                'video_url' => $validated['video_url'],
-                'private' => $validated['private'],
-                'is_draft' => $validated['is_draft'],
-                'image' => $image_banner,
-                'thumbnail' => $image_thumbnail
-            ]);
+                // upload images and update the json instruction data with the image path name
+                $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
+
+                Recipe::create([
+                    'user_id' => $user_id,
+                    'title' => $validated['title'],
+                    'summary' => $validated['summary'],
+                    'ingredients' => $validated['ingredients'],
+                    'instruction' => json_encode($instructions),
+                    'video_url' => $validated['video_url'],
+                    'private' => $validated['private'],
+                    'is_draft' => $validated['is_draft'],
+                    'image' => $image_banner,
+                    'thumbnail' => $image_thumbnail
+                ]);
+
+            DB::commit();
 
             return back()->with('status', 201);
 
         }catch(Throwable $e){
+            DB::rollBack();
+
             // Call in controller to create or update the error file
             CustomFile::index('RecipeController', 'error', [
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
@@ -93,26 +101,41 @@ class RecipeController extends Controller
      * Display the specified resource.
      */
     public function show(Recipe $recipe, $id)
-    {
-        $recipe = $this->recipe_model->get_recipe_details($id);
-        
-        // check if the recipe is available
-        if($recipe->count() > 0){
-            $recipe = $recipe[0];
-            // get array of exploded title
-            $exploded_title = explode(' ', $recipe->title);
-            // get recommendation list
-            $recommendation_list = $this->common_library->get_recommendation($recipe->id, $exploded_title);
+    { 
+        try{
+            $decrypted_result = $this->common_library->decrypt_id($id);
 
-            // get comments
-            $comments = $this->comment_controller->get_comments_by_user_id($id);
-            $total_comments = Recipe::find($id)->comments()->count();
+            $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
+
+            $recipe = $this->recipe_model->get_recipe_details($decrypted_id);
             
-            return view('web.recipe.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list'));
+            // check if the recipe is available
+            if($recipe->count() > 0){
+                $recipe = $recipe[0];
+                // get array of exploded title
+                $exploded_title = explode(' ', $recipe->title);
+                // get recommendation list
+                $recommendation_list = $this->common_library->get_recommendation($recipe->id, $exploded_title);
+
+                // get comments
+                $comments = $this->comment_controller->get_comments_by_user_id($decrypted_id);
+                $total_comments = Recipe::find($decrypted_id)->comments()->count();
+                
+                return view('web.recipe.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list'));
+            }
+            
+            // display error 404
+            return redirect('/recipe/error/404');
+                
+        }catch(Throwable $e){
+            // Create or update the log file for error
+            CustomFile::index('RecipeController', 'error', [
+                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            ]);
+
+            // display error 404
+            return redirect('/recipe/error/404');
         }
-        
-        // display error 404
-        return redirect('/recipe/error/404');
     }
 
     /**
@@ -120,10 +143,23 @@ class RecipeController extends Controller
      */
     public function edit(Recipe $recipe, $id)
     {
-        $boolean = Boolean::cases();
-        $item = Recipe::find($id);
+        try{
+            $decrypted_result = $this->common_library->decrypt_id($id);
+            $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
+
+            $boolean = Boolean::cases();
+            $item = Recipe::find($decrypted_id);
+            
+            return view('web.recipe.edit', ['recipe' => $item, 'boolean' => $boolean]);
+
+        }catch(Throwable $e){
+            CustomFile::index('RecipeController', 'error', [
+                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+            ]);
+
+            return redirect('profile');
+        }
         
-        return view('web.recipe.edit', ['recipe' => $item, 'boolean' => $boolean]);
     }
 
     /**
@@ -132,48 +168,55 @@ class RecipeController extends Controller
     public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
         try{
-            $recipe = Recipe::find($request->id);
-            $validated = $request->validated();
+            $decrypted_result = $this->common_library->decrypt_id($request->id);
+            $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
 
-            $old_image = $recipe->image;
-            $old_thumbnail = $recipe->thumbnail;
+            DB::beginTransaction();
 
-            $image_banner = $old_image;
-            $image_thumbnail = $old_thumbnail;
-            
-            // banner
-            if($request->hasFile('image')){
-                // get the existing image filepath and remove
-                // image / banner
-                $this->image_library->delete_stored_image($old_image);
-                // thumbnail
-                $this->image_library->delete_stored_image($old_thumbnail);
+                $recipe = Recipe::find($decrypted_id);
+                $validated = $request->validated();
+
+                $old_image = $recipe->image;
+                $old_thumbnail = $recipe->thumbnail;
+
+                $image_banner = $old_image;
+                $image_thumbnail = $old_thumbnail;
                 
-                $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
-                $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
+                // banner
+                if($request->hasFile('image')){
+                    // get the existing image filepath and remove
+                    // image / banner
+                    $this->image_library->delete_stored_image($old_image);
+                    // thumbnail
+                    $this->image_library->delete_stored_image($old_thumbnail);
+                    
+                    $image_banner = $this->image_library->createImageFromBase64Image($request->attachment_banner, 'uploads/recipes/user_' .auth()->user()->id. '/banner/', 1200);
+                    $image_thumbnail = $this->image_library->createImageFromBase64Image($request->attachment_thumbnail, 'uploads/recipes/user_' .auth()->user()->id. '/thumbnail/');
 
-            }
-            // get the image list of old and new instruction
-            $new_image_list = $this->get_image_list_from_json_data($validated['instruction']);
-            $old_image_list = $this->get_image_list_from_json_data($recipe->instruction);
+                }
+                // get the image list of old and new instruction
+                $new_image_list = $this->get_image_list_from_json_data($validated['instruction']);
+                $old_image_list = $this->get_image_list_from_json_data($recipe->instruction);
 
-            // remove deleted images from storage
-            $this->remove_old_image_from_storage($old_image_list, $new_image_list);
+                // remove deleted images from storage
+                $this->remove_old_image_from_storage($old_image_list, $new_image_list);
 
-            // upload images and update the json instruction data with the image path name
-            $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
+                // upload images and update the json instruction data with the image path name
+                $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
 
-            $recipe->update([
-                'title' => $validated['title'],
-                'summary' => $validated['summary'],
-                'ingredients' => $validated['ingredients'],
-                'instruction' => json_encode($instructions),
-                'video_url' => $validated['video_url'],
-                'private' => $validated['private'],
-                'is_draft' => $validated['is_draft'],
-                'image' => $image_banner,
-                'thumbnail' => $image_thumbnail
-            ]);
+                $recipe->update([
+                    'title' => $validated['title'],
+                    'summary' => $validated['summary'],
+                    'ingredients' => $validated['ingredients'],
+                    'instruction' => json_encode($instructions),
+                    'video_url' => $validated['video_url'],
+                    'private' => $validated['private'],
+                    'is_draft' => $validated['is_draft'],
+                    'image' => $image_banner,
+                    'thumbnail' => $image_thumbnail
+                ]);
+            
+            DB::commit();
 
             return back()->with('status', 201);
 
@@ -193,9 +236,11 @@ class RecipeController extends Controller
     public function destroy(Request $request, Recipe $recipe)
     {
         try{
-            
+            $decrypted_result = $this->common_library->decrypt_id($request->id);
+            $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
+
             // get the recipe details
-            $recipe = Recipe::find($request->id);
+            $recipe = Recipe::find($decrypted_id);
 
             $banner = $recipe->image;
             $thumbnail = $recipe->thumbnail;
@@ -212,7 +257,7 @@ class RecipeController extends Controller
 
             $recipe->delete();
             
-            return redirect(route('profile.index'))->with('status', 201);
+            return redirect(route('profile.index'))->with('status', 200);
 
         }catch(Throwable $e){
             // Call in controller

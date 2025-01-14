@@ -10,10 +10,9 @@
                     {{ session('message') }}
                 </div>
             @endif
-            <form method="POST" action="{{ route('recipe.update', $recipe->id) }}" class="w-full max-w-2xl" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('recipe.update', Crypt::encrypt($recipe->id)) }}" class="w-full max-w-2xl" enctype="multipart/form-data">
                 @csrf
                 @method('patch')
-                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}" />
                 <div class="my-4">
                     <x-input-label for="image" :value="__('Image:')" class="font-semibold"/>
                     <x-input-file name="image" id="image" :value="old('image')" :width="1000" :height="559" update_value="{{ $recipe->image }}" />
@@ -107,7 +106,7 @@
                 <div class="my-6 mx-auto md:w-1/3 w-full"> 
                     <x-primary-button class="w-full">{{ __('Update') }}</x-primary-button>
                     @if(session('status') === 201)
-                        @include('web.recipe.components.success', ['status'=> 200, 'message' => 'Recipe was successfully updated!', 'routeName' => 'recipe.show', 'recipeId' => $recipe->id, 'buttonLabel' => 'Back'])
+                        @include('web.recipe.components.success', ['status'=> 200, 'message' => 'Recipe was successfully updated!', 'routeName' => 'recipe.show', 'recipeId' => Crypt::encrypt($recipe->id), 'buttonLabel' => 'Back'])
                     @elseif(session('status') === 400)
                         @include('web.recipe.components.error', ['status'=> 200, 'message' => "Unfortunately we have an issue while updating your recipe. Please try again!"])
                     @endif

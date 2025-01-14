@@ -6,7 +6,7 @@
                 <div class="bg-cover flex flex-col rounded-sm md:max-w-[33%] w-[49.8%] md:h-[300px] h-[200px] items-center shadow-md bg-blend-overlay md:py-2 py-4 bg-center md:m-[1px] m-[.5px] mx-auto bg-[#faf7f526]/10 hover:bg-[#faf7f526]/30 hover:text-gray-800 hover:font-bold " style="background-image: url('{{ Storage::url($item->thumbnail)}}')">
                     <div class="w-full flex justify-around items-center h-[20%]">
                         <div class=" mt-4 mr-auto ml-2 ">
-                            <a href="{{ route('profile.show', $item->user_id) }}" alt="{{ $item->user_id }}">
+                            <a href="{{ route('profile.show', Crypt::encrypt($item->user_id)) }}" alt="{{ $item->user_id }}">
                                 @if($item->profile_image != 'default_profile.svg')
                                     <img src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}" class="rounded-full md:h-[50px] h-[30px] md:w-[50px] w-[30px]"  />
                                 @else
@@ -16,18 +16,18 @@
                         </div>
                         <div class="flex justify-between gap-1 ml-auto mr-2 mt-4">
                             <div>
-                                <a href="{{ route('recipe.show', $item->id) }}" class="block">
+                                <a href="{{ route('recipe.show', Crypt::encrypt($item->id)) }}" class="block">
                                     <x-view-logo></x-view-logo>
                                 </a>
                             </div>
                             <div>
-                                <a href="{{ route('favorite.remove', $item->favorite_id) }}" class="block">
+                                <a href="{{ route('favorite.remove', Crypt::encrypt($item->favorite_id)) }}" class="block">
                                     <x-unfavorite></x-unfavorite>
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('recipe.show', $item->id) }}" alt="{{ $item->title }}" class="w-full md:mt-auto my-auto text-center items-center text-wrap">
+                    <a href="{{ route('recipe.show', Crypt::encrypt($item->id)) }}" alt="{{ $item->title }}" class="w-full md:mt-auto my-auto text-center items-center text-wrap">
                         <h1 class="text-white md:text-3xl text-lg leading-auto min-h-20 px-4 py-3 rounded-sm font-semibold hover:text-gray-800 hover:font-bold">
                         {{ $item->title }} 
                         </h1>

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Libraries\CommonLibrary;
+use App\Logging\CustomFile;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Throwable;
 
 class AdminController extends Controller
 {
+    public $common_library;
     /**
      * Create a new controller instance.
      *
@@ -14,7 +18,7 @@ class AdminController extends Controller
      */
     public function __construct()
     {
-        
+        $this->common_library = new CommonLibrary();
     }
 
     /**
@@ -76,14 +80,24 @@ class AdminController extends Controller
     }
 
     public function verify_account(Request $request){
-        if($request->id != ''){
-            $user = User::find($request->id);
+        try{
+            if($request->id != ''){
+                $decrypted_result = $this->common_library->decrypt_id($request->id);
+                $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
 
-            $user->update([
-                'admin_verified' => 1
+                $user = User::find($decrypted_id);
+    
+                $user->update([
+                    'admin_verified' => 1
+                ]);
+            }
+            return redirect(route('admin.index'));
+        }catch(Throwable $e){
+            CustomFile::index("AdminController", "error", [
+                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
             ]);
 
+            return back();
         }
-        return redirect(route('admin.index'));
     }
 }

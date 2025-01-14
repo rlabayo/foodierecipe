@@ -23,7 +23,7 @@
                         @endif
 
                         @if($comment->user_id == auth()->user()->id || $recipeCreator == auth()->user()->id)
-                            <form action="{{ route('comment.destroy', $comment->id) }}" method="POST" class="mt-2">
+                            <form action="{{ route('comment.destroy', Crypt::encrypt($comment->id)) }}" method="POST" class="mt-2">
                                 @csrf
                                 @method('delete')
                                 <button class="ml-auto">
@@ -40,7 +40,7 @@
                     <form method="POST" action="{{ route('comment.update') }}" enctype="multipart/form-data" class="w-full">
                         @csrf
                         @method('patch')
-                        <input type="hidden" name="id" value="{{$comment->id}}" />
+                        <input type="hidden" name="recipe_id" value="{{Crypt::encrypt($comment->id)}}" />
                         <textarea name="comment" class="h-[6rem] w-full text-sm border-[--primary] dark:border-primary dark:bg-[--input-dark-bg-color] dark:text-[--secondary] focus:border-[--primary] dark:focus:border-[--primary] focus:ring-[--primary] dark:focus:ring-[--primary] rounded-md shadow-sm">{{ $comment->comment }}</textarea>
                         <x-input-error :messages="$errors->get('comment')" class="mt-1 mb-2" />
                         <x-primary-button>{{ __('Update comment') }}</x-primary-button>

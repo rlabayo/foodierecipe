@@ -1,24 +1,29 @@
+@push('headerScript')
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+@endpush
 <div class="md:w-3/4 w-full bg-white">
     <div class="flex flex-row justify-around items-center w-full">
-        <div class="w-full">
+        <div class="w-full my-10 ml-6">
             @if(parse_url(URL::current(), PHP_URL_PATH) != session('customPrevURL'))
-                <a href="{{session('customPrevURL')}}" alt="Back to list" class="flex items-center justify-center py-1 px-1 font-bold lg:w-2/6 md:w-3/6 w-full rounded-full border-solid border-2 border-[--primary] text-[--primary] hover:border-4 my-10 ml-6"><img src="{{ Storage::url('/assets/images/icons/back.svg') }}" alt="Back to list" /><span class="ml-2">Back to list</span></a>
+                @if(session('customPrevURL') != "")
+                    <a href="{{session('customPrevURL')}}" alt="Back to list" class="flex items-center justify-center py-1 px-1 font-bold lg:w-2/6 md:w-3/6 w-full rounded-full border-solid border-2 border-[--primary] text-[--primary] hover:border-4"><img src="{{ Storage::url('/assets/images/icons/back.svg') }}" alt="Back to list" /><span class="ml-2">Back to list</span></a>
+                @endif
             @else
-                <a href="/" alt="Back to list button" class="flex items-center justify-center py-1 px-1 font-bold lg:w-2/6 md:w-3/6 w-full rounded-full border-solid border-2 border-[--primary] text-[--primary] hover:border-4 my-10 ml-6"><img src="{{ Storage::url('/assets/images/icons/back.svg') }}" alt="Back to list" /><span class="ml-2">Back to list</span></a>
+                <a href="/" alt="Back to list button" class="flex items-center justify-center py-1 px-1 font-bold lg:w-2/6 md:w-3/6 w-full rounded-full border-solid border-2 border-[--primary] text-[--primary] hover:border-4"><img src="{{ Storage::url('/assets/images/icons/back.svg') }}" alt="Back to list" /><span class="ml-2">Back to list</span></a>
             @endif
         </div>
         <div class="w-full flex">
             @auth
                 @if($recipe->is_favorite == '1' && $recipe->user_id != auth()->user()->id)
                     <div class="ml-auto">
-                        <a href="{{ route('favorite.remove', $recipe->favorite_id) }}"  alt="Remove favorite button" class="flex items-center justify-end font-bold mr-6">  
+                        <a href="{{ route('favorite.remove', Crypt::encrypt($recipe->favorite_id)) }}"  alt="Remove favorite button" class="flex items-center justify-end font-bold mr-6">  
                             <x-unfavorite></x-unfavorite>
                         </a>
                     </div>
                     
                 @elseif($recipe->is_favorite == '0' && $recipe->user_id != auth()->user()->id)
                     <div class="ml-auto">
-                        <a href="{{ route('favorite.add', $recipe->id) }}"  alt="Add favorite button" class="flex items-center justify-end font-bold mr-6">
+                        <a href="{{ route('favorite.add', Crypt::encrypt($recipe->id)) }}"  alt="Add favorite button" class="flex items-center justify-end font-bold mr-6">
                             <x-favorite></x-favorite>
                         </a>
                     </div>
@@ -27,12 +32,12 @@
                 @if($recipe->user_id == auth()->user()->id)
                     <div class="flex ml-auto items-center">
                         <div class="ml-auto">
-                            <a href="{{ route('recipe.edit', $recipe->id) }}"  alt="Edit button" class="flex items-center justify-end font-bold mr-2 border-2 rounded-full border-[--primary] hover:border-4">
+                            <a href="{{ route('recipe.edit', Crypt::encrypt($recipe->id)) }}"  alt="Edit button" class="flex items-center justify-end font-bold mr-2 border-2 rounded-full border-[--primary] hover:border-4">
                                 <x-edit-logo></x-edit-logo>
                             </a>
                         </div>
                         <div class="mr-auto">
-                            <form action="{{ route('recipe.delete', $recipe->id) }}" method="POST" class="delete_form">
+                            <form action="{{ route('recipe.delete', Crypt::encrypt($recipe->id)) }}" method="POST" class="delete_form">
                                 @csrf
                                 @method('delete')
                                 <x-trash-icon type="submit" class="block mr-6 border-2 rounded-full border-[--primary] hover:border-4" ></x-trash-icon>
@@ -123,3 +128,6 @@
         font-size:1.2rem;
     }
 </style>
+@push('script')
+    <script src="{{ Storage::url('assets/js/delete_confirmation.js') }}" defer></script>
+@endpush

@@ -16,10 +16,14 @@
 
 <script>
     document.getElementById('search_btn').addEventListener('click', function(){
-        document.getElementById("search_form").submit();
+        if(document.getElementById('search').value != ""){
+            document.getElementById("search_form").submit();
+        }
     });
 
     document.getElementById('search').addEventListener('change', function(){
-        document.getElementById("search_form").submit();
+        if(document.getElementById('search').value != ""){
+            document.getElementById("search_form").submit();
+        }
     });
 </script>

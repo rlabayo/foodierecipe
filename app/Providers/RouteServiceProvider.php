@@ -38,7 +38,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         // Global constraint for route parameter
-        Route::pattern('id', '[0-9]+');
+        // Route::pattern('id', '[0-9]+');
         
         Route::fallback(function () {
             return redirect()->route('error404');
