@@ -18,4 +18,7 @@
         @include('web.recipe.components.error', ['status'=> 200, 'message' => 'Unfortunately we have an issue while deleting your new recipe. Please try again!'])
     @endif
 
+    @push('script')
+        <script src="{{ Storage::url('assets/js/delete_confirmation.js') }}" defer></script>
+    @endpush
 </x-app-layout>

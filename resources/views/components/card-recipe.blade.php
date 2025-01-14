@@ -60,10 +60,6 @@
                             <x-trash-icon type="submit" class="block" ></x-trash-icon>
                         </form>
                     </div>
-
-                    @push('script')
-                        <script src="{{ Storage::url('assets/js/delete_confirmation.js') }}" defer></script>
-                    @endpush
                 @endif
             @endauth
         </div>
