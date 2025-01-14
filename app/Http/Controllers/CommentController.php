@@ -4,21 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
+use App\Libraries\CommonLibrary;
 use App\Logging\CustomFile;
 use App\Models\Comment;
 use App\Models\Profile;
 use App\Models\Recipe;
 use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CommentController extends Controller
 {
+    public $common_library;
+
+    public function __construct()
+    {
+        $this->common_library = new CommonLibrary();
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+
     }
 
     /**
@@ -35,19 +44,24 @@ class CommentController extends Controller
     public function store(StoreCommentRequest $request)
     {
         try{
-            
-            $validated = $request->validated();
+            DB::beginTransaction();
 
-            Comment::create([
-                'user_id' => auth()->user()->id,
-                'recipe_id' => $request->id,
-                'comment' => $validated['comment'] 
-            ]);
+                $validated = $request->validated();
+
+                Comment::create([
+                    'user_id' => auth()->user()->id,
+                    'recipe_id' => Crypt::decrypt($validated['recipe_id']),
+                    'comment' => $validated['comment'] 
+                ]);
+            
+            DB::commit();
 
             return back();
             // return back()->with('commentStatus', 201);
 
         }catch(Throwable $e){
+            DB::rollBack();
+
             // Call in controller
             CustomFile::index('CommentController', 'error', [
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
@@ -80,21 +94,28 @@ class CommentController extends Controller
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
         try{
-            $validated = $request->validated();
+            DB::beginTransaction();
+                $validated = $request->validated();
+                $decrypted_id = Crypt::decrypt($validated['recipe_id']);
+                
+                $comment = Comment::find($decrypted_id);
+                
+                $comment->update([
+                    'comment' => $validated['comment']
+                ]);
             
-            $comment = Comment::find($request->id);
-            
-            $comment->update([
-                'comment' => $validated['comment']
-            ]);
-            
+            DB::commit();
+
             return back();
             // return back()->with('commentStatus', 200);
 
         }catch(Throwable $e){
+            DB::rollBack();
+
             CustomFile::index('CommentController', 'error' ,[
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
             ]);
+
             return back();
             // return back()->withInput()->with('commentStatus', 400);
         }
@@ -106,13 +127,17 @@ class CommentController extends Controller
     public function destroy(Comment $comment, $id)
     {
         try{
-            $comment = Comment::find($id);
+            DB::beginTransaction();
+                $comment = Comment::find(Crypt::decrypt($id));
 
-            $comment->delete();
+                $comment->delete();
+            DB::commit();
 
             return back();
 
         }catch(Throwable $e){
+            DB::rollBack();
+
             CustomFile::index('CommentController', 'error', [
                 'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
             ]);

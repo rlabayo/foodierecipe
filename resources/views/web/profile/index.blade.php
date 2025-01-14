@@ -12,15 +12,10 @@
         </div>
     </div>
 
-    @if(session('status') === 201)
+    @if(session('status') === 200)
         @include('web.recipe.components.success', ['status'=> 200, 'message' => 'Recipe deleted successfully!', 'routeName' => 'profile.index', 'buttonLabel' => 'Back to Recipe'])
     @elseif(session('status') === 400)
         @include('web.recipe.components.error', ['status'=> 200, 'message' => 'Unfortunately we have an issue while deleting your new recipe. Please try again!'])
     @endif
-    
-    @push('script')
-        <script src="{{ Storage::url('assets/js/delete_confirmation.js') }}" defer></script>
-    @endpush
-
 
 </x-app-layout>

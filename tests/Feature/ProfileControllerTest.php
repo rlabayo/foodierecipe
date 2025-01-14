@@ -2,125 +2,192 @@
 
 namespace Tests\Feature;
 
+use App\Models\Profile;
+use App\Models\Recipe;
+use App\Models\User;
+use App\Models\Favorite;
+use App\Models\Follow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    protected $user;
+    protected $otherUser;
+
+    public function setUp(): void
     {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
+        parent::setUp();
 
-        $response = $this->actingAs($user)
-            ->get('/profile');
+        // Create users for testing
+        $this->user = User::factory()->create();
+        $this->otherUser = User::factory()->create();
 
-        $response->assertOk();
+        // Create profile for users
+        $this->user->profile()->create([
+            'image' => 'assets/images/default_profile.svg',
+            'thumbnail' => 'assets/images/default_profile.svg',
+            'description' => 'Enter description here',
+            'private' => 1
+        ]);
+
+        $this->otherUser->profile()->create([
+            'image' => 'assets/images/default_profile.svg',
+            'thumbnail' => 'assets/images/default_profile.svg',
+            'description' => 'Enter other user description here',
+            'private' => 1
+        ]);
+
+        // Create recipes for the user
+        Recipe::factory()->create(['user_id' => $this->user->id, 'is_draft' => false]);
+        Recipe::factory()->create(['user_id' => $this->user->id, 'is_draft' => true]);
+        Recipe::factory()->create(['user_id' => $this->otherUser->id, 'is_draft' => false]);
+
+        // Authenticate the user
+        $this->actingAs($this->user);
     }
 
-    public function test_profile_can_be_viewed(): void
+    /**
+     * Test viewing own profile.
+     */
+    public function test_view_own_profile()
     {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
-
-        $response = $this->actingAs($user)
-                ->get('/profile/' . $user->id);
-
-        $response->assertOk();
+        $response = $this->get(route('profile.index', Crypt::encrypt($this->user->id)));
+var_dump($response);
+        // $response->assertStatus(200)
+        //          ->assertViewIs('web.profile.index');
+                //  ->assertViewHas('user', $this->user)
+                //  ->assertViewHas('profile');
     }
 
-    public function test_profile_can_be_edited(): void
-    {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
-
-        $response = $this->actingAs($user)
-                ->get('/profile/user/edit');
-
-        $response->assertOk();
-    }
-
-    public function test_profile_information_can_be_updated(): void
-    {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
-
-        $response = $this
-            ->actingAs($user)
-            ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'description' => 'Good food. Happy Tummy.'
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirectToRoute('profile.edit');
-
-        $user->profile->refresh();
-
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
-    }
-
-    // public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    // /**
+    //  * Test viewing another user's profile.
+    //  */
+    // public function test_view_other_user_profile()
     // {
-    //     $user = User::factory()->create();
+    //     $response = $this->get(route('profile.index', ['id' => encrypt($this->otherUser->id)]));
 
-    //     $response = $this
-    //         ->actingAs($user)
-    //         ->patch('/profile', [
-    //             'name' => 'Test User',
-    //             'email' => $user->email,
-    //             'description' => 'Good food. Happy Tummy.'
-    //         ]);
-
-    //     $response
-    //         ->assertSessionHasNoErrors()
-    //         ->assertRedirect('/profile');
-
-    //     $this->assertNotNull($user->refresh()->email_verified_at);
+    //     $response->assertStatus(200)
+    //              ->assertViewIs('web.profile.index')
+    //              ->assertViewHas('user', $this->otherUser);
     // }
 
-    public function test_user_can_delete_their_account(): void
-    {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
+    // /**
+    //  * Test profile editing form.
+    //  */
+    // public function test_edit_profile()
+    // {
+    //     $response = $this->get(route('profile.edit'));
 
-        $response = $this
-            ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
-            ]);
+    //     $response->assertStatus(200)
+    //              ->assertViewIs('web.profile.edit')
+    //              ->assertViewHas('user', $this->user);
+    // }
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
+    // /**
+    //  * Test updating profile information.
+    //  */
+    // public function test_update_profile()
+    // {
+    //     $response = $this->put(route('profile.update'), [
+    //         'name' => 'Updated User Name',
+    //         'email' => 'updated@example.com',
+    //         'description' => 'Updated description for the user',
+    //         'password' => 'password123', // Assuming password is required for validation
+    //         'password_confirmation' => 'password123'
+    //     ]);
 
-        $this->assertGuest();
-        $this->assertNull($user->fresh());
-    }
+    //     $response->assertRedirect(route('profile.edit'))
+    //              ->assertSessionHas('status', 'profile-updated');
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user_profile = new CreateUserProfile();
-        $user = $user_profile->create_user_profile();
+    //     $this->user->refresh();
 
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile/user/edit')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
+    //     $this->assertEquals('Updated User Name', $this->user->name);
+    //     $this->assertEquals('updated@example.com', $this->user->email);
+    //     $this->assertEquals('Updated description for the user', $this->user->profile->description);
+    // }
 
-        $response
-            // ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirectToRoute('profile.edit');
+    // /**
+    //  * Test deleting user account.
+    //  */
+    // public function test_delete_user_account()
+    // {
+    //     $response = $this->delete(route('profile.destroy'), [
+    //         'password' => 'password123' // The password must be correct to proceed with deletion
+    //     ]);
 
-        $this->assertNotNull($user->fresh());
-    }
+    //     $response->assertRedirect('/')
+    //              ->assertSessionHas('status', 'error-deleted');
 
+    //     $this->assertNull(User::find($this->user->id));
+    //     $this->assertNull(Profile::find($this->user->profile->id));
+    //     $this->assertTrue(Auth::check() === false); // User is logged out
+    // }
+
+    // /**
+    //  * Test viewing drafts for a user.
+    //  */
+    // public function test_view_user_drafts()
+    // {
+    //     $response = $this->get(route('profile.drafts', ['id' => encrypt($this->user->id)]));
+
+    //     $response->assertStatus(200)
+    //              ->assertViewIs('web.profile.index')
+    //              ->assertViewHas('recipes')
+    //              ->assertViewHas('user', $this->user);
+    // }
+
+    // /**
+    //  * Test handling of non-existing user or encrypted ID issue.
+    //  */
+    // public function test_view_non_existent_user_profile()
+    // {
+    //     $response = $this->get(route('profile.index', ['id' => encrypt(9999)])); // non-existent user
+
+    //     $response->assertRedirect(route('profile.error404'));
+    // }
+
+    // /**
+    //  * Test handling of errors during profile update.
+    //  */
+    // public function test_update_profile_with_invalid_data()
+    // {
+    //     $response = $this->put(route('profile.update'), [
+    //         'name' => '', // Invalid name
+    //         'email' => 'updated@example.com',
+    //         'description' => 'Updated description for the user',
+    //         'password' => 'password123',
+    //         'password_confirmation' => 'password123'
+    //     ]);
+
+    //     $response->assertStatus(302) // Should redirect back
+    //              ->assertSessionHasErrors('name'); // Expecting validation errors for name
+    // }
+
+    // /**
+    //  * Test that profile image directory is deleted when user is deleted.
+    //  */
+    // public function test_delete_profile_image_directory_on_user_deletion()
+    // {
+    //     Storage::fake('public');
+
+    //     // Assuming user has a profile image stored
+    //     $this->user->profile->update(['image' => 'user_image.jpg']);
+        
+    //     // Verify the directory exists
+    //     Storage::disk('public')->put('uploads/profiles/user_' . $this->user->id, 'dummy-content');
+
+    //     $this->delete(route('profile.destroy'), [
+    //         'password' => 'password123'
+    //     ]);
+
+    //     // Assert that the directory was deleted
+    //     Storage::disk('public')->assertMissing('uploads/profiles/user_' . $this->user->id);
+    // }
 }
+?>

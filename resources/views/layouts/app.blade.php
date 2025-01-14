@@ -22,5 +22,6 @@
         <x-navigation></x-navigation>
         {{ $slot }}
         @stack('script')
+
     </body>
 </html>

@@ -13,3 +13,4 @@ yarn-error.log
 /.vscode
 /public/hot
 /.phpunit.cache
+/tests

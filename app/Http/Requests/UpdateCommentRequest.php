@@ -22,6 +22,7 @@ class UpdateCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'recipe_id' => ['required', 'string'],
             'comment' => ['required', 'max:500'],
             'attachment' => ['mimes:png,jpg,jpeg,JPG,PNG,JPEG','max:2048']
         ];

@@ -58,22 +58,15 @@ class Recipe extends Model
      */
 
     public function get_all_recipes() {
-        // $following = Follow::select('follow')->where('user_id', auth()->user()->id)->get();
-
-        // $orderBy = [];
-        // foreach($following as $item){
-        //     $temp['recipes.user_id'] = $item['follow'];
-        //     array_push($orderBy, $temp);
-        // }
-
         $items = Recipe::distinct()
-                    ->select('recipes.*', 'profiles.image AS profile_image')
+                    ->select('recipes.*', 'profiles.image AS profile_image', 'users.name AS user_name')
                     ->leftJoin('profiles', 'recipes.user_id', '=', 'profiles.user_id')
-                    ->leftJoin('follows', 'recipes.user_id', '=', 'follows.follow') 
+                    // ->leftJoin('follows', 'recipes.user_id', '=', 'follows.follow') 
+                    ->leftJoin('users', 'recipes.user_id', '=', 'users.id')
                     ->where('recipes.user_id', '!=', auth()->user()->id)
                     ->where('recipes.is_draft', '=', '0')
                     ->orderBy('recipes.created_at', 'desc')
-                    ->orderBy('follows.id', 'desc')
+                    // ->orderBy('follows.id', 'desc')
                     ->paginate(6)->onEachSide(5);
 
 
@@ -92,7 +85,6 @@ class Recipe extends Model
                 $items[$key]->favorite_by = auth()->user()->id;
             }
         }
-        // order by following
         
         return $items;
     }
@@ -115,6 +107,35 @@ class Recipe extends Model
             ->get();
 
         return $recipe;
+    }
+
+    public function get_all_following_recipes(){
+        $items = Recipe::select('recipes.*', 'profiles.image AS profile_image')
+                    ->leftJoin('profiles', 'recipes.user_id', '=', 'profiles.user_id')
+                    ->leftJoin('follows', 'profiles.user_id', '=', 'follows.follow')
+                    ->where('follows.user_id', '=', auth()->user()->id)
+                    ->where('recipes.is_draft', '=', '0')
+                    // ->where()
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(6)
+                    ->onEachSide(5);
+        
+        foreach($items as $key => $item){
+            $favorite = Favorite::where('recipe_id', '=', $item->id)
+                    ->where('user_id', '=', auth()->user()->id)
+                    ->get();
+
+            $items[$key]->is_favorite = 0;
+            $items[$key]->favorite_by = null;
+            
+            if($favorite->count() > 0){
+                $items[$key]->favorite_id = $favorite[0]->id;
+                $items[$key]->is_favorite = 1;
+                $items[$key]->favorite_by = auth()->user()->id;
+            }
+        }
+        
+        return $items;
     }
 
 

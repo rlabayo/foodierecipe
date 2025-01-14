@@ -37,7 +37,6 @@ class RecipeFactory extends Factory
             'thumbnail' => 'assets/images/default.png',
             // 'image' => $this->faker->imageUrl(640, 480, true),
             // 'thumbnail' => $this->faker->imageUrl(640, 480, true),
-            'unit' => 'grams'
             ];
 
         return $data;

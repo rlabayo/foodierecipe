@@ -31,7 +31,7 @@
                   <td class="px-6 py-4">{{$item->created_at->diffForHumans()}}</td>
                   <th class="px-6 py-4">
                     @if(!$item->admin_verified)
-                      <a href="{{ route('admin.verify_account', $item->id) }}" alt="Verify Account" class="flex justify-center text-center py-2 px-2 font-semibold rounded-md bg-[--primary] text-white hover:bg-[--secondary] hover:border-1 hover:border-gray-500">Verify Account</a>
+                      <a href="{{ route('admin.verify_account', Crypt::encrypt($item->id)) }}" alt="Verify Account" class="flex justify-center text-center py-2 px-2 font-semibold rounded-md bg-[--primary] text-white hover:bg-[--secondary] hover:border-1 hover:border-gray-500">Verify Account</a>
                     @else
                       <span class="text-blue-700">Verified</span>
                     @endif
