@@ -93,19 +93,15 @@ class Recipe extends Model
      * Get the recipe details
      */
     public function get_recipe_details($id){
-        // $recipe = DB::table('recipes')
-        //         ->select('recipes.*')
-        //         ->selectRaw('favorites.id as favorite_id, (CASE WHEN favorites.id IS NULL then 0 else 1 END) AS is_favorite')
-        //         ->leftJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
-        //         ->where('recipes.id', '=', $id)
-        //         ->get()[0];
+        
         $recipe = DB::table('recipes')
             ->select('recipes.*')
             ->selectRaw('favorites.id as favorite_id, (CASE WHEN favorites.id IS NULL then 0 else 1 END) AS is_favorite')
-            ->leftJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
+            ->rightJoin('favorites', 'recipes.id' , '=', 'favorites.recipe_id')
             ->where('recipes.id', '=', $id)
             ->get();
-
+            dd($recipe);
+            
         return $recipe;
     }
 

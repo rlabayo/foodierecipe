@@ -27,7 +27,7 @@
                     </a>
                 </div>
             @endauth
-
+            
             @auth
                 @if($item->user_id != auth()->user()->id) 
                     @if($item->is_favorite == '1')
@@ -36,7 +36,7 @@
                                 <x-unfavorite></x-unfavorite>
                             </a>
                         </div>
-                    @elseif($item->is_favorite == 0 && $item->user_id != auth()->user()->id)
+                    @elseif($item->is_favorite == 0)
                         <div class="ml-auto">
                             <a href="{{ route('favorite.add', Crypt::encrypt($item->id)) }}"  alt="Add favorite button" class="flex items-center justify-center font-bold">
                                 <x-favorite></x-favorite>

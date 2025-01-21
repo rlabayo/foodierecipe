@@ -21,9 +21,11 @@
                                 </a>
                             </div>
                             <div>
-                                <a href="{{ route('favorite.remove', Crypt::encrypt($item->favorite_id)) }}" class="block">
-                                    <x-unfavorite></x-unfavorite>
-                                </a>
+                                @if($user->id == auth()->user()->id)
+                                    <a href="{{ route('favorite.remove', Crypt::encrypt($item->favorite_id)) }}" class="block">
+                                        <x-unfavorite></x-unfavorite>
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
