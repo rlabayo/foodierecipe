@@ -62,15 +62,21 @@ class GuestController extends Controller
                     $comments[$key]->profile_thumbnail = Profile::find(['user_id', $comment->user_id])[0]->image;
                     $comments[$key]->profile_name = User::select('name')->where('id', $comment->user_id)->get()[0]->name;
                 }
+                $user = User::find($recipe->user_id);
 
-                return view('web.guest.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list'));
+                return view('web.guest.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list', 'user'));
             }else {
                 // if the recipe is not public, the user needs to log in to view the recipe
                 return redirect(route("recipe.show", $id));
             }
         }catch(Throwable $e){
-            CustomFile::index("GuestController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+            CustomFile::index("GuestController", "error", [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return redirect('/recipe/error/404');

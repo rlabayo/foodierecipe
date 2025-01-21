@@ -35,6 +35,8 @@ $(document).ready(function(){
         }else{
             if(instruction != ""){
                 elem = add_instruction_item(instruction_item_length, instruction, '')
+            }else if(attached_src != undefined){
+                elem = add_instruction_item(instruction_item_length, instruction, attached_src)
             }else{
                 document.getElementById('instruction_error').innerHTML = "Please fill up instruction before clicking the add button.";
             }

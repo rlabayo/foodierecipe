@@ -3,7 +3,7 @@
         @if(!strpos(parse_url(url()->current(), PHP_URL_PATH), "profile") && !strpos(parse_url(url()->current(), PHP_URL_PATH), "drafts"))
         <div class="mr-auto ml-4">
             <a href="{{ route('profile.show', Crypt::encrypt($item->user_id)) }}" alt="{{ $item->user_name }}">
-                <img src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->user_name }}"  class="rounded-full h-[50px] w-[50px]" />
+                <x-profile-image src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->user_name }}" class="h-[50px] w-[50px]" ></x-profile-image>
             </a>
         </div>
         @endif
@@ -51,14 +51,12 @@
                             <x-edit-logo></x-edit-logo>
                         </a>
                     </div>
-                    <div>
-                        <!-- <x-confirmation-modal></x-confirmation-modal> -->
-
+                    <div id="delete_{{$item->id}}">
                         <form action="{{ route('recipe.delete', Crypt::encrypt($item->id)) }}" method="POST" class="delete_form">
                             @csrf
                             @method('delete')
                             <x-trash-icon type="submit" class="block" ></x-trash-icon>
-                        </form>
+                        </form> 
                     </div>
                 @endif
             @endauth

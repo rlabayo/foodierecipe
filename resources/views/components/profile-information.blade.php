@@ -2,9 +2,9 @@
     <div class="flex md:flex-row flex-col justify-center items-center md:w-1/2 w-full mx-auto">
         <div class="md:w-1/3 w-full">
             @if($profile->image != 'default_profile.svg')
-                <img src="{{Storage::url('')}}{{$profile->image}}" alt="" class="rounded-full md:ml-auto mx-auto" width="120" height="120" />
+                <x-profile-image src="{{Storage::url('')}}{{$profile->image}}" alt="{{ $username }}" width="120" height="120" class="md:ml-auto mx-auto" ></x-profile-image>
             @else
-                <img src="{{Storage::url('assets/images/')}}{{$profile->image}}" alt="" class="rounded-full md:ml-auto mx-auto" width="120" height="120" />
+                <x-profile-image src="{{Storage::url('assets/images/')}}{{$profile->image}}" alt="{{ $username }}" width="120" height="120" class="md:ml-auto mx-auto" ></x-profile-image>
             @endif
         </div>
         <div class="flex flex-col mr-auto lg:w-2/3 w-full">

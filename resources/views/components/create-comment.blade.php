@@ -7,10 +7,10 @@
         <textarea id="comment" name="comment" class="h-[6rem] w-full text-sm border-[--primary] dark:border-primary dark:bg-[--input-dark-bg-color] dark:text-[--secondary] focus:border-[--primary] dark:focus:border-[--primary] focus:ring-[--primary] dark:focus:ring-[--primary] rounded-md shadow-sm" placeholder="Add a comment.">{{ old('comment') }}</textarea>
         <x-input-error :messages="$errors->get('comment')" class="mt-1 mb-2" />
         <x-primary-button>{{ __('Submit comment') }}</x-primary-button>
-        @if(session('commentStatus') === 201)
-            @include('web.recipe.components.success', ['status'=> 201, 'message' => 'You successfully commented to this recipe.', 'routeName' => 'recipe.show', 'recipeId' => Crypt::encrypt($recipeId), 'buttonLabel' => 'Back to Recipe'])
-        @elseif(session('commentStatus') === 400)
-            @include('web.recipe.components.error', ['status'=> 400, 'message' => 'Unfortunately we have an issue while submitting your comment. Please try again!'])
+        @if(session('statusCode') === 201)
+            @include('components.success-modal', ['status'=> session('statusCode'), 'message' => session('message'), 'routeName' => 'recipe.show', 'recipeId' => Crypt::encrypt($recipeId), 'buttonLabel' => 'Back to Recipe'])
+        @elseif(session('errorStatusCode') != "")
+            @include('component.error-modal', ['status'=> session('errorStatusCode'), 'message' => session('message')])
         @endif
     </form>
 </div>

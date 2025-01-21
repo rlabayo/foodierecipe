@@ -43,6 +43,7 @@ class RecipeController extends Controller
     {
         $boolean = Boolean::cases();
 
+        // return view('web.recipe.create-wysiwig', compact('boolean'));
         return view('web.recipe.create', compact('boolean'));
     }
 
@@ -67,12 +68,17 @@ class RecipeController extends Controller
 
                 // upload images and update the json instruction data with the image path name
                 $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
+                // filter the instruction array to remove indexes that without values
+                $instructions = array_filter($instructions, function($a) { return $a->instruction_item !== "" || $a->attached_photo !== "";});
+                // filter the ingredients array to remove indexes that without values
+                $ingredients = array_filter(json_decode($validated['ingredients']), function($b) { return $b->item !== "";});
+                
 
                 Recipe::create([
                     'user_id' => $user_id,
                     'title' => $validated['title'],
                     'summary' => $validated['summary'],
-                    'ingredients' => $validated['ingredients'],
+                    'ingredients' => $ingredients,
                     'instruction' => json_encode($instructions),
                     'video_url' => $validated['video_url'],
                     'private' => $validated['private'],
@@ -83,17 +89,28 @@ class RecipeController extends Controller
 
             DB::commit();
 
-            return back()->with('status', 201);
+            return back()->with([
+                'statusCode' => 201,
+                'message' => 'New recipe was successfully added!'
+            ]);
 
         }catch(Throwable $e){
             DB::rollBack();
 
             // Call in controller to create or update the error file
-            CustomFile::index('RecipeController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('RecipeController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
             
-            return back()->withInput()->with('status', 400);
+            return back()->withInput()->with([
+                'errorStatusCode' => $e->getCode(),
+                'message' => 'An error occurred while creating your recipe. Please try again!'
+            ]);
         }
     }
 
@@ -120,8 +137,9 @@ class RecipeController extends Controller
                 // get comments
                 $comments = $this->comment_controller->get_comments_by_user_id($decrypted_id);
                 $total_comments = Recipe::find($decrypted_id)->comments()->count();
+                $user = User::find($recipe->user_id);
                 
-                return view('web.recipe.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list'));
+                return view('web.recipe.show', compact('recipe', 'comments', 'total_comments', 'recommendation_list', 'user'));
             }
             
             // display error 404
@@ -129,8 +147,13 @@ class RecipeController extends Controller
                 
         }catch(Throwable $e){
             // Create or update the log file for error
-            CustomFile::index('RecipeController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('RecipeController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             // display error 404
@@ -153,8 +176,13 @@ class RecipeController extends Controller
             return view('web.recipe.edit', ['recipe' => $item, 'boolean' => $boolean]);
 
         }catch(Throwable $e){
-            CustomFile::index('RecipeController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+            CustomFile::index('RecipeController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return redirect('profile');
@@ -168,6 +196,7 @@ class RecipeController extends Controller
     public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
         try{
+            // throw new \Exception("Encrypted ID is corrupted.");
             $decrypted_result = $this->common_library->decrypt_id($request->id);
             $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
 
@@ -203,30 +232,47 @@ class RecipeController extends Controller
 
                 // upload images and update the json instruction data with the image path name
                 $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
-
+                // filter the instruction array to remove indexes that without values
+                $instructions = array_filter($instructions, function($a) {return $a->instruction_item !== "" || $a->attached_photo !== "";});
+                // filter the ingredients array to remove indexes that without values
+                $ingredients = array_filter(json_decode($validated['ingredients']), function($b) { return $b->item !== "";});
+                
                 $recipe->update([
                     'title' => $validated['title'],
                     'summary' => $validated['summary'],
-                    'ingredients' => $validated['ingredients'],
+                    'ingredients' => $ingredients,
                     'instruction' => json_encode($instructions),
                     'video_url' => $validated['video_url'],
                     'private' => $validated['private'],
                     'is_draft' => $validated['is_draft'],
                     'image' => $image_banner,
-                    'thumbnail' => $image_thumbnail
+                    'thumbnail' => $image_thumbnail,
+                    'updated_at' => date('Y-m-d H:i:s')
                 ]);
-            
+
             DB::commit();
 
-            return back()->with('status', 201);
+            return back()->with([
+                'statusCode' => 200,
+                'message' => 'Recipe was successfully updated!'
+            ]);
 
         }catch(Throwable $e){
             // Call in controller
-            CustomFile::index('RecipeController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('RecipeController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
             
-            return back()->withInput()->with('status', 400);
+            // return back()->withInput()->with('status', 400);
+            return back()->withInput()->with([
+                'errorStatusCode' => $e->getCode(),
+                'error' => 'An error occurred while updating your recipe. Please try again. If the problem persists, kindly contact the administrator for assistance.'
+            ]);
         }
     }
 
@@ -257,15 +303,26 @@ class RecipeController extends Controller
 
             $recipe->delete();
             
-            return redirect(route('profile.index'))->with('status', 200);
+            return redirect(route('profile.index'))->with([
+                'statusCode' => 200,
+                'message' => 'Recipe deleted successfully!'
+            ]);
 
         }catch(Throwable $e){
             // Call in controller
-            CustomFile::index('RecipeController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('RecipeController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
             
-            return back()->with('status', 400);
+            return back()->with([
+                'status' => $e->getCode(),
+                'message' => 'An error occurred while deleting your recipe. Please try again!'
+            ]);
         }
     }
 
@@ -338,7 +395,6 @@ class RecipeController extends Controller
                 $instructions[$key]->attached_photo = '';
             }
         }
-
         return $instructions;
      }
 

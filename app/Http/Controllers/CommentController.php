@@ -56,19 +56,28 @@ class CommentController extends Controller
             
             DB::commit();
 
-            return back();
-            // return back()->with('commentStatus', 201);
+            return back()->with([
+                'statusCode' => 201,
+                'message' => 'Comment was created successfully.'
+            ]);
 
         }catch(Throwable $e){
             DB::rollBack();
 
             // Call in controller
-            CustomFile::index('CommentController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('CommentController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
             
-            return back();
-            // return back()->withInput()->with('commentStatus', 400);
+            return back()->withInput()->with([
+                'errorStatusCode' => $e->getCode(),
+                'message' => 'An error occurred while creating your comment. Please try again.'
+            ]);
         }
     }
 
@@ -106,18 +115,27 @@ class CommentController extends Controller
             
             DB::commit();
 
-            return back();
-            // return back()->with('commentStatus', 200);
+            return back()->with([
+                'statusCode' => 200,
+                'message' => 'Comment was updated successfully'
+            ]);
 
         }catch(Throwable $e){
             DB::rollBack();
 
-            CustomFile::index('CommentController', 'error' ,[
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+            CustomFile::index('CommentController', 'error' ,[ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
-            return back();
-            // return back()->withInput()->with('commentStatus', 400);
+            return back()->withInput()->with([
+                'errorStatusCode' => $e->getCode(),
+                'message' => 'An error occurred while updating your comment. Please try again.'
+            ]);
         }
     }
 
@@ -133,16 +151,27 @@ class CommentController extends Controller
                 $comment->delete();
             DB::commit();
 
-            return back();
+            return back()->with([
+                'statusCode' => 200,
+                'message' => 'Comment was successfully deleted.'
+            ]);
 
         }catch(Throwable $e){
             DB::rollBack();
 
-            CustomFile::index('CommentController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+            CustomFile::index('CommentController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
-            return back();
+            return back()->with([
+                'errorStatusCode' => $e->getMessage(),
+                'message' => 'Error encountered while deleting a comment. Please try again.'
+            ]);
         }
     }
 

@@ -5,11 +5,6 @@
     <div class="max-w-5xl mx-auto pt-4 pb-4 px-6 bg-white shadow-lg sm:rounded-lg my-10">
         <h1 class="text-[--secondary] text-2xl font-semibold text-center md:mt-10 mt-2">Edit Recipe</h1>
         <div class="flex flex-wrap mt-4 md:gap-2 gap-[.1rem] justify-center">
-            @if (session('message'))
-                <div class="text-red-500 font-bold">
-                    {{ session('message') }}
-                </div>
-            @endif
             <form method="POST" action="{{ route('recipe.update', Crypt::encrypt($recipe->id)) }}" class="w-full max-w-2xl" enctype="multipart/form-data">
                 @csrf
                 @method('patch')
@@ -105,10 +100,10 @@
                 <!-- </div> -->
                 <div class="my-6 mx-auto md:w-1/3 w-full"> 
                     <x-primary-button class="w-full">{{ __('Update') }}</x-primary-button>
-                    @if(session('status') === 201)
-                        @include('web.recipe.components.success', ['status'=> 200, 'message' => 'Recipe was successfully updated!', 'routeName' => 'recipe.show', 'recipeId' => Crypt::encrypt($recipe->id), 'buttonLabel' => 'Back'])
-                    @elseif(session('status') === 400)
-                        @include('web.recipe.components.error', ['status'=> 200, 'message' => "Unfortunately we have an issue while updating your recipe. Please try again!"])
+                    @if(session('statusCode') === 200)
+                        @include('components.success-modal', ['status'=> session('statusCode'), 'message' => session('message'), 'routeName' => 'recipe.show', 'recipeId' => Crypt::encrypt($recipe->id), 'buttonLabel' => 'Back'])
+                    @elseif(session('errorStatusCode') != "")
+                        @include('components.error-modal', ['status'=> session('errorStatusCode'), 'message' => session('error')])
                     @endif
                 </div>
             </form>

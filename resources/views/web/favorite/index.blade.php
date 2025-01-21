@@ -8,13 +8,13 @@
                         <div class=" mt-4 mr-auto ml-2 ">
                             <a href="{{ route('profile.show', Crypt::encrypt($item->user_id)) }}" alt="{{ $item->user_id }}">
                                 @if($item->profile_image != 'default_profile.svg')
-                                    <img src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}" class="rounded-full md:h-[50px] h-[30px] md:w-[50px] w-[30px]"  />
+                                    <x-profile-image src="{{Storage::url('')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}" width="50" height="50" class="md:h-[50px] h-[30px] md:w-[50px] w-[30px]" ></x-profile-image>
                                 @else
-                                    <img src="{{Storage::url('assets/images/')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}"  class="rounded-full md:h-[50px] h-[30px] md:w-[50px] w-[30px]"  />
+                                    <x-profile-image src="{{Storage::url('assets/images/')}}{{$item->profile_image}}" alt="{{ $item->profile_image }}" width="50" height="50" class="md:h-[50px] h-[30px] md:w-[50px] w-[30px]" ></x-profile-image>
                                 @endif
                             </a>
                         </div>
-                        <div class="flex justify-between gap-1 ml-auto mr-2 mt-4">
+                        <div class="flex justify-between ml-auto mr-2 mt-2 items-center">
                             <div>
                                 <a href="{{ route('recipe.show', Crypt::encrypt($item->id)) }}" class="block">
                                     <x-view-logo></x-view-logo>

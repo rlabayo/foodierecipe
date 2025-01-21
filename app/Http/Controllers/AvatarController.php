@@ -82,7 +82,12 @@ class AvatarController extends Controller
         }catch(Throwable $e){
             // Call in controller
             CustomFile::index('AvatarController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+                'message' => [
+                    "code" => $e->getCode(),
+                    'message' => $e->getMessage(), 
+                    'file' => $e->getFile(), 
+                    'line' => $e->getLine()
+                ],
             ]);
             
             return back()->withInput()->with('status', 400);
