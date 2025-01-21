@@ -68,17 +68,13 @@ class RecipeController extends Controller
 
                 // upload images and update the json instruction data with the image path name
                 $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
-                // filter the instruction array to remove indexes that without values
-                $instructions = array_filter($instructions, function($a) { return $a->instruction_item !== "" || $a->attached_photo !== "";});
-                // filter the ingredients array to remove indexes that without values
-                $ingredients = array_filter(json_decode($validated['ingredients']), function($b) { return $b->item !== "";});
                 
 
                 Recipe::create([
                     'user_id' => $user_id,
                     'title' => $validated['title'],
                     'summary' => $validated['summary'],
-                    'ingredients' => $ingredients,
+                    'ingredients' => $validated['ingredients'],
                     'instruction' => json_encode($instructions),
                     'video_url' => $validated['video_url'],
                     'private' => $validated['private'],
@@ -232,15 +228,11 @@ class RecipeController extends Controller
 
                 // upload images and update the json instruction data with the image path name
                 $instructions = $this->instructions_upload_images(json_decode($validated['instruction']));
-                // filter the instruction array to remove indexes that without values
-                $instructions = array_filter($instructions, function($a) {return $a->instruction_item !== "" || $a->attached_photo !== "";});
-                // filter the ingredients array to remove indexes that without values
-                $ingredients = array_filter(json_decode($validated['ingredients']), function($b) { return $b->item !== "";});
                 
                 $recipe->update([
                     'title' => $validated['title'],
                     'summary' => $validated['summary'],
-                    'ingredients' => $ingredients,
+                    'ingredients' => $validated['ingredients'],
                     'instruction' => json_encode($instructions),
                     'video_url' => $validated['video_url'],
                     'private' => $validated['private'],

@@ -84,12 +84,14 @@
         <div class="mt-10">
             <h2 class="md:text-2xl text-xl font-semibold">Directions:</h2>
             <ol class="mx-4 list-decimal space-y-4" id="customlist">
-                @foreach(json_decode($recipe->instruction,true) as $key => $instruction)
+                @php $key = 1; @endphp
+                @foreach(json_decode($recipe->instruction,true) as $instruction)
                     <li>
                         <p>
                             @php
                                 if($instruction['instruction_item'] != ''){
-                                    echo '<span class="text-md font-bold">'. $key+1 .'.</span>';
+                                    echo '<span class="text-md font-bold">'. $key .'.</span>';
+                                    $key++;
                                 }
                             @endphp
                             {{ $instruction['instruction_item'] }}
