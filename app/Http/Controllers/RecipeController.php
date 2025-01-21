@@ -8,9 +8,11 @@ use App\Http\Requests\UpdateRecipeRequest;
 use App\Libraries\CommonLibrary;
 use App\Libraries\ImageLibrary;
 use App\Logging\CustomFile;
+use App\Models\Favorite;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Illuminate\Support\Facades\Crypt;
@@ -22,6 +24,7 @@ class RecipeController extends Controller
     public $common_library;
     public $comment_controller;
     public $recipe_model;
+    public $favorite_model;
     
     public function __construct()
     {
@@ -34,6 +37,7 @@ class RecipeController extends Controller
 
         // Model
         $this->recipe_model = new Recipe();
+        $this->favorite_model = new Favorite();
     }
 
     /**
@@ -120,11 +124,26 @@ class RecipeController extends Controller
 
             $decrypted_id = $decrypted_result['status'] != false ? $decrypted_result['id'] : throw new \Exception("Encrypted ID is corrupted.");
 
-            $recipe = $this->recipe_model->get_recipe_details($decrypted_id);
+            // $recipe = $this->recipe_model->get_recipe_details($decrypted_id);
+            $recipe = Recipe::where('id', '=', $decrypted_id)->get();
             
             // check if the recipe is available
             if($recipe->count() > 0){
+                if(Auth::check()){
+                    $favorite_result = $this->favorite_model->is_favorite(auth()->user()->id, $decrypted_id);
+                    
+                    if($favorite_result != false) {
+                        $recipe[0]->favorite_id = $favorite_result[0]->favorite_id;
+                        $recipe[0]->is_favorite = 1;
+                        $recipe[0]->favorite_by = $favorite_result[0]->favorite_by;
+                    }else{
+                        $recipe[0]->favorite_id = "";
+                        $recipe[0]->is_favorite = 0;
+                        $recipe[0]->favorite_by = "";
+                    }
+                }
                 $recipe = $recipe[0];
+                
                 // get array of exploded title
                 $exploded_title = explode(' ', $recipe->title);
                 // get recommendation list
