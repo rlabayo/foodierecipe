@@ -229,7 +229,7 @@ class FollowController extends Controller
 
             DB::commit();
 
-            return redirect(route('profile.index', auth()->user()->id));
+            return redirect(route('follower'));
 
         }catch(Throwable $e){
             DB::rollBack();
