@@ -55,7 +55,14 @@ class FavoriteController extends Controller
             ]);
 
         }catch(Throwable $e){
-            CustomFile::index("FavoriteController", "error", ["message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]]);
+            CustomFile::index("FavoriteController", "error", [
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
+            ]);
 
             return redirect(route('favorite.error404'));
         }
@@ -78,7 +85,12 @@ class FavoriteController extends Controller
             DB::rollBack();
 
             CustomFile::index('FavoriteController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -100,7 +112,12 @@ class FavoriteController extends Controller
             DB::rollBack();
 
             CustomFile::index("FavoriteController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -109,15 +126,26 @@ class FavoriteController extends Controller
 
     public function store(Request $request){
         try{
+            DB::beginTransaction();
+
             Favorite::create([
                 'user_id' => auth()->user()->id,
                 'recipe_id' => $request->id
             ]);
+
+            DB::commit();
     
             return redirect("recipe/$request->id");
         }catch(Throwable $e){
+            DB::rollBack();
+            
             CustomFile::index("FavoriteController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();

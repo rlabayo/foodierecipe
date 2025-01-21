@@ -92,8 +92,13 @@ class ProfileController extends Controller
             ]);
         }catch(Throwable $e){
             // Create or update the log file for error
-            CustomFile::index('ProfileController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('ProfileController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return redirect(route('profile.error404'));
@@ -117,6 +122,7 @@ class ProfileController extends Controller
             // Get the favorite list of the user
             $favorite_list = $user->favorite()->get();
 
+var_dump($user);
             return view('web.profile.index', [
                 'user' => $user,
                 'profile' => $profile[0],
@@ -127,8 +133,13 @@ class ProfileController extends Controller
             ]);
         }catch(Throwable $e){
             // Create or update the log file for error
-            CustomFile::index('ProfileController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('ProfileController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return redirect(route('profile.error404'));
@@ -174,8 +185,13 @@ class ProfileController extends Controller
             DB::rollBack();
 
             // Call in controller
-            CustomFile::index('ProfileController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('ProfileController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
             
             return back()->withInput()->with('status', 'error-updated');
@@ -243,8 +259,13 @@ class ProfileController extends Controller
             DB::rollBack();
 
             // Call in controller
-            CustomFile::index('ProfileController', 'error', [
-                'message' => ['message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()],
+            CustomFile::index('ProfileController', 'error', [ 
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back()->with('status', 'error-deleted');
@@ -252,45 +273,58 @@ class ProfileController extends Controller
     }
 
     public function drafts(Request $request){
+        try{
+            // Set custom url path for show recipe back button
+            session(['customPrevURL' => parse_url(url()->current(), PHP_URL_PATH)]);
 
-        // Set custom url path for show recipe back button
-        session(['customPrevURL' => parse_url(url()->current(), PHP_URL_PATH)]);
+            $user_id = $request->id != NULL ? $request->id : auth()->user()->id;
+            $profile = Profile::where('user_id', '=', $user_id)->get();
+            $recipes = Recipe::where(['user_id' => $user_id, 'is_draft' => '1'])->latest()->get();
+            $user = User::find($user_id);
 
-        $user_id = $request->id != NULL ? $request->id : auth()->user()->id;
-        $profile = Profile::where('user_id', '=', $user_id)->get();
-        $recipes = Recipe::where(['user_id' => $user_id, 'is_draft' => '1'])->latest()->get();
-        $user = User::find($user_id);
-        
-        if($user == null) {
-            return redirect(route('profile.error404'));
-        }
-        
-        if($request->id != auth()->user()->id){
-            $favorite_model = new Favorite();
+            if($user == null) {
+                return redirect(route('profile.error404'));
+            }
 
-            // check if the recipes are user's favorites
-            foreach($recipes as $key => $item){
-                $favorite_result = $favorite_model->is_favorite(auth()->user()->id, $item['id']);
-                
-                // if recipe is a favorite of the current user
-                if($favorite_result != false){
-                    $recipes[$key]->favorite_id = $favorite_result[0]->favorite_id;
-                    $recipes[$key]->is_favorite = 1;
-                    $recipes[$key]->favorite_by = $favorite_result[0]->favorite_by;
+            if($request->id != auth()->user()->id){
+                $favorite_model = new Favorite();
+
+                // check if the recipes are user's favorites
+                foreach($recipes as $key => $item){
+                    $favorite_result = $favorite_model->is_favorite(auth()->user()->id, $item['id']);
+                    
+                    // if recipe is a favorite of the current user
+                    if($favorite_result != false){
+                        $recipes[$key]->favorite_id = $favorite_result[0]->favorite_id;
+                        $recipes[$key]->is_favorite = 1;
+                        $recipes[$key]->favorite_by = $favorite_result[0]->favorite_by;
+                    }
                 }
             }
-        }
 
-        return view('web.profile.index', [
-            'user' => $user,
-            'profile' => $profile[0],
-            'recipes' => $recipes,
-            'total_favorite' => $user->favorite()->get()->count(),
-            'total_post' => Recipe::where('user_id', $user_id)->count(),
-            'total_follower' => Follow::where('follow', $user_id)->count(),
-            'total_following' => Follow::where('user_id', $user_id)->count(),
-            'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
-            'userType' => 'member'
-        ]);
+            return view('web.profile.index', [
+                'user' => $user,
+                'profile' => $profile[0],
+                'recipes' => $recipes,
+                'total_favorite' => $user->favorite()->get()->count(),
+                'total_post' => Recipe::where('user_id', $user_id)->count(),
+                'total_follower' => Follow::where('follow', $user_id)->count(),
+                'total_following' => Follow::where('user_id', $user_id)->count(),
+                'is_follow' => $this->follow->is_follow(auth()->user()->id, $request->id),
+                'userType' => 'member'
+            ]);
+
+        }catch(Throwable $e){
+            CustomFile::index("ProfileController", "error", [
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(),
+                    "file" => $e->getFile(),
+                    "line" => $e->getLine()
+                ]
+            ]);
+
+            return redirect(route('drafts'));
+        }
     }
 }

@@ -11,7 +11,7 @@
                                 <div class="flex flex-row justify-between w-full">
                                     <div class="md:flex-row flex-col flex gap-4 w-1/2">
                                         <div class="md:w-1/3 w-auto my-auto">
-                                            <img src="{{ Storage::url($item->profile_image) }}" alt="{{$item->name}}" width="50" height="50" class="rounded-full md:mx-auto mx-0"/>
+                                            <x-profile-image src="{{Storage::url($item->profile_image)}}" alt="{{ $item->name }}" width="50" height="50" class="md:mx-auto mx-0" ></x-profile-image>
                                         </div>
                                         <div class="md:w-2/3 w-auto">
                                             <a href="{{ route('profile.show', Crypt::encrypt($item->profile_id)) }}" alt="Go to profile"><h5 class="font-semibold">{{$item->name}}</h5></a>

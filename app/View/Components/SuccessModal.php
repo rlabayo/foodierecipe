@@ -6,14 +6,14 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class ConfirmationModal extends Component
+class SuccessModal extends Component
 {
     /**
      * Create a new component instance.
      */
-    public function __construct(public string $itemId="")
+    public function __construct()
     {
-        $this->itemId = $itemId;
+        //
     }
 
     /**
@@ -21,6 +21,6 @@ class ConfirmationModal extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.confirmation-modal');
+        return view('components.success-modal');
     }
 }

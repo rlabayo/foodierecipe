@@ -13,9 +13,9 @@
     </div>
 
     @if(session('status') === 200)
-        @include('web.recipe.components.success', ['status'=> 200, 'message' => 'Recipe deleted successfully!', 'routeName' => 'profile.index', 'buttonLabel' => 'Back to Recipe'])
+        @include('components.success-modal', ['status'=> session('status'), 'message' => session('message'), 'routeName' => 'profile.index', 'buttonLabel' => 'Back to Recipe'])
     @elseif(session('status') === 400)
-        @include('web.recipe.components.error', ['status'=> 200, 'message' => 'Unfortunately we have an issue while deleting your new recipe. Please try again!'])
+        @include('components.error-modal', ['status'=> session('status'), 'message' => session('message')])
     @endif
 
     @push('script')

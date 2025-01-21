@@ -94,7 +94,11 @@ class AdminController extends Controller
             return redirect(route('admin.index'));
         }catch(Throwable $e){
             CustomFile::index("AdminController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()]
             ]);
 
             return back();

@@ -1,3 +1,5 @@
+@props(["user"])
+
 @push('headerScript')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 @endpush
@@ -53,11 +55,10 @@
         <h1 class="text-[--text-secondary] md:text-[48px] text-[40px] text-center font-semibold md:leading-normal leading-[3rem]">
             {{ $recipe->title }}
         </h1>
-        <p class="text-[--text-secondary] text-md text-center font-[400] md:leading-normal leading-[1.2rem]">
+        <p class="text-[--text-secondary] text-center text-sm font-[350] md:leading-normal leading-[1.2rem] mt-2 mb-4">By: <a href="{{ route('profile.show', Crypt::encrypt($user->id)) }}" class="font-semibold hover:text-[--primary]">{{$user->name}}</a> &nbsp; Posted: {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} &nbsp; Updated: {{ Carbon\Carbon::parse($recipe->updated_at)->format('F d, Y') }}</p>
+        <p class="text-[--text-secondary] text-md text-justify font-[400] md:leading-normal leading-[1.2rem]">
             {{ $recipe->summary }}
         </p>
-        <p class="text-[--text-secondary] text-sm text-center font-[350] md:leading-normal leading-[1.2rem] mt-2"> {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} </p>
-        
         <div class="flex w-full md:min-h-[550px] min-h-[300px] rounded-lg mt-6 bg-cover bg-center" style="background-image: url({{Storage::url($recipe->image)}})">
             @if($recipe->video_url != '')
                 <a href="{{ $recipe->video_url }}" rel="noreferrer" target="__blank" class="w-0 h-0 
@@ -83,9 +84,17 @@
         <div class="mt-10">
             <h2 class="md:text-2xl text-xl font-semibold">Directions:</h2>
             <ol class="mx-4 list-decimal space-y-4" id="customlist">
-                @foreach(json_decode($recipe->instruction,true) as $instruction)
+                @foreach(json_decode($recipe->instruction,true) as $key => $instruction)
                     <li>
-                        <p>{{ $instruction['instruction_item'] }}</p>
+                        <p>
+                            @php
+                                if($instruction['instruction_item'] != ''){
+                                    echo '<span class="text-md font-bold">'. $key+1 .'.</span>';
+                                }
+                            @endphp
+                            {{ $instruction['instruction_item'] }}
+                        </p>
+
                         @if($instruction['attached_photo'] != '')
                             <img src="{{ Storage::url($instruction['attached_photo']) }}" alt="Instruction photo" class="w-[300px] mx-auto rounded-md shadow-md my-4">
                         @endif
@@ -120,7 +129,7 @@
 
     #customlist>li:before {
         /* print out "Element " followed by the current counter value */
-        content: "Step " counter(elementcounter);
+        /* content: "Step " counter(elementcounter); */
         /* increment counter */
         counter-increment: elementcounter;
         font-weight: bold;

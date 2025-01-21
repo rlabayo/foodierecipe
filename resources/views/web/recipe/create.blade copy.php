@@ -1,8 +1,6 @@
 <x-app-layout>
     @push('headerScript')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-
-    <!-- <script src="https://cdn.tiny.cloud/1/3rrycfl3chghen0hxa7j0avr48m3yyvhyjzmao15ygpef9cq/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> -->
     @endpush
     <div class="max-w-5xl mx-auto pt-4 pb-4 px-6 bg-white shadow-lg sm:rounded-lg my-10">
         <h1 class="text-[--secondary] text-2xl font-semibold text-center md:mt-10 mt-2">New Recipe</h1>
@@ -133,19 +131,5 @@
 
     <!-- Banner Image -->
     <script src="{{ Storage::url('assets/js/photo_preview.js') }}" defer></script>
-
-    <!-- <script>
-        tinymce.init({
-            selector: 'textarea',
-            menubar: '',
-            toolbar: 'bullist',
-            // menu : {
-            //     format: { title : 'Format', items : 'bold italic underline' }
-            // },
-            toolbar: 'undo redo | bold italic underline bullist numlist image',
-            plugins: ['lists', 'image'],
-            automatic_uploads: true,
-        });
-    </script> -->
 @endpush
 </x-app-layout>

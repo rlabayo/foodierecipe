@@ -69,7 +69,12 @@ class FollowController extends Controller
             ]);
         }catch(Throwable $e){
             CustomFile::index("FollowController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -118,7 +123,12 @@ class FollowController extends Controller
 
         }catch(Throwable $e){
             CustomFile::index("FollowController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -146,8 +156,15 @@ class FollowController extends Controller
             return redirect(route('profile.index', $request->id));
 
         }catch(Throwable $e){
+            DB::rollBack();
+            
             CustomFile::index("FollowController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -179,7 +196,12 @@ class FollowController extends Controller
             DB::rollBack();
 
             CustomFile::index("FollowController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
@@ -213,7 +235,12 @@ class FollowController extends Controller
             DB::rollBack();
 
             CustomFile::index("FollowController", "error", [
-                "message" => ["message" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()]
+                "message" => [
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage(), 
+                    "file" => $e->getFile(), 
+                    "line" => $e->getLine()
+                ]
             ]);
 
             return back();
