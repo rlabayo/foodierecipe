@@ -55,7 +55,10 @@
         <h1 class="text-[--text-secondary] md:text-[48px] text-[40px] text-center font-semibold md:leading-normal leading-[3rem]">
             {{ $recipe->title }}
         </h1>
-        <p class="text-[--text-secondary] text-center text-sm font-[350] md:leading-normal leading-[1.2rem] mt-2 mb-4">By: <a href="{{ route('profile.show', Crypt::encrypt($user->id)) }}" class="font-semibold hover:text-[--primary]">{{$user->name}}</a> &nbsp; Posted: {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} &nbsp; Updated: {{ Carbon\Carbon::parse($recipe->updated_at)->format('F d, Y') }}</p>
+        <div class="flex md:flex-row flex-col gap-1 my-4 justify-center">
+            <p class="text-[--text-secondary] text-sm font-[350] md:leading-normal leading-[1.2rem]">By: <a href="{{ route('profile.show', Crypt::encrypt($user->id)) }}" class="font-semibold hover:text-[--primary]">{{$user->name}} &nbsp;</a></p>
+            <p class="text-[--text-secondary] text-sm font-[350] md:leading-normal leading-[1.2rem]">Posted: {{ Carbon\Carbon::parse($recipe->created_at)->format('F d, Y') }} &nbsp; Updated: {{ Carbon\Carbon::parse($recipe->updated_at)->format('F d, Y') }}</p>
+        </div>
         <p class="text-[--text-secondary] text-md text-justify font-[400] md:leading-normal leading-[1.2rem]">
             {{ $recipe->summary }}
         </p>
